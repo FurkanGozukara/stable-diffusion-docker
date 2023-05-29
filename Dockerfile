@@ -57,7 +57,7 @@ COPY --from=sd-models /SDv2-768.ckpt /sd-models/SDv2-768.ckpt
 
 WORKDIR /workspace/stable-diffusion-webui
 
-ADD relauncher.py /workspace/stable-diffusion-webui/
+ADD launcher.py /workspace/stable-diffusion-webui/
 ADD webui-user.sh /workspace/stable-diffusion-webui/
 ADD start.sh /start.sh
 RUN chmod a+x /start.sh
