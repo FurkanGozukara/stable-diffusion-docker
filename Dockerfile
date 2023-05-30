@@ -41,7 +41,7 @@ RUN add-apt-repository ppa:deadsnakes/ppa
 RUN apt install python3.10-dev python3.10-venv -y --no-install-recommends && \
 	ln -s /usr/bin/python3.10 /usr/bin/python && \
 	rm /usr/bin/python3 && \
-	ln -s /usr/bin/python3.10 /usr/bin/python3 \
+	ln -s /usr/bin/python3.10 /usr/bin/python3
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 RUN python3 get-pip.py
 
