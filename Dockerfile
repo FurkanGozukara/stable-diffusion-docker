@@ -43,7 +43,7 @@ RUN apt install python3.10-dev python3.10-venv -y --no-install-recommends && \
 	rm /usr/bin/python3 && \
 	ln -s /usr/bin/python3.10 /usr/bin/python3
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-RUN python3 get-pip.py
+RUN python3 get-pip.py && rm get-pip.py
 
 # Instell torch
 RUN pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
