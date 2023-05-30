@@ -1,5 +1,3 @@
-FROM runpod/stable-diffusion:models-1.0.0 as sd-models
-FROM runpod/stable-diffusion-models:2.1 as hf-cache
 FROM runpod/pytorch:3.10-2.0.0-117 AS runtime
 
 ENV DEBIAN_FRONTEND noninteractive
@@ -39,7 +37,9 @@ RUN pip3 install -U jupyterlab ipywidgets jupyter-archive gdown
 RUN jupyter nbextension enable --py widgetsnbextension
 
 WORKDIR /workspace/stable-diffusion-webui
-ADD install.py .
+COPY requirements.txt ./requirements.txt
+COPY requirements_versions.txt ./requirements_versions.txt
+COPY install.py ./install.py
 RUN python -m install --skip-torch-cuda-test
 RUN pip3 install torch==1.13.1 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu117
 RUN pip3 install https://huggingface.co/MonsterMMORPG/SECourses/resolve/main/xformers-0.0.19-cp310-cp310-manylinux2014_x86_64.whl
@@ -49,13 +49,10 @@ RUN git clone https://github.com/d8ahazard/sd_dreambooth_extension.git
 
 WORKDIR /workspace/stable-diffusion-webui/extensions/sd_dreambooth_extension
 RUN git reset 1.0.14 --hard
+COPY requirements_dreambooth.txt ./requirements.txt
 
-RUN mkdir -p /root/.cache/huggingface && mkdir -p /sd-models
-
-# TODO: Make own model image with safetensors v1.5 and VAE
-COPY --from=hf-cache /root/.cache/huggingface /root/.cache/huggingface
-COPY --from=sd-models /SDv1-5.ckpt /sd-models/SDv1-5.ckpt
-COPY --from=sd-models /SDv2-768.ckpt /sd-models/SDv2-768.ckpt
+ADD https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/v1-5-pruned.safetensors /workspace/stable-diffusion-webui/models/Stable-diffusion/v1-5-pruned.safetensors
+ADD https://huggingface.co/stabilityai/sd-vae-ft-mse-original/resolve/main/vae-ft-mse-840000-ema-pruned.safetensors /workspace/stable-diffusion-webui/models/VAE/vae-ft-mse-840000-ema-pruned.safetensors
 
 WORKDIR /workspace/stable-diffusion-webui
 ADD launcher.py /workspace/stable-diffusion-webui/

@@ -3,17 +3,6 @@ echo "Container Started"
 export PYTHONUNBUFFERED=1
 source /venv/bin/activate
 
-if [[ ${INSTALL_MODELS} ]]
-then
-    echo "Download Stable Diffusion model"
-    cd /home/ubuntu/stable-diffusion-webui/models/Stable-diffusion
-    wget https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/v1-5-pruned.safetensors
-
-    echo "Download Stable Diffusion VAE"
-    cd /home/ubuntu/stable-diffusion-webui/models/VAE
-    wget https://huggingface.co/stabilityai/sd-vae-ft-mse-original/resolve/main/vae-ft-mse-840000-ema-pruned.safetensors
-fi
-
 if [[ ${RUNPOD_STOP_AUTO} ]]
 then
     echo "Skipping auto-start of Web UI"
