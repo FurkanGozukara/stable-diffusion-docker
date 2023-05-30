@@ -49,7 +49,8 @@ RUN python3 get-pip.py
 RUN pip3 install torch torchvision torchaudio
 
 # Install Jupyter
-RUN pip3 install -U jupyterlab ipywidgets jupyter-archive
+RUN pip3 install -U jupyterlab ipywidgets jupyter-archive jupyter_contrib_nbextensions
+RUN jupyter contrib nbextension install --user
 RUN jupyter nbextension enable --py widgetsnbextension
 
 # Install runpodctl
