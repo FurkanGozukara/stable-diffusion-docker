@@ -50,14 +50,17 @@ RUN git clone https://github.com/d8ahazard/sd_dreambooth_extension.git
 WORKDIR /workspace/stable-diffusion-webui/extensions/sd_dreambooth_extension
 RUN git reset 1.0.14 --hard
 COPY requirements_dreambooth.txt ./requirements.txt
+RUN pip3 install -r requirements.txt
 
 ADD https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/v1-5-pruned.safetensors /workspace/stable-diffusion-webui/models/Stable-diffusion/v1-5-pruned.safetensors
 ADD https://huggingface.co/stabilityai/sd-vae-ft-mse-original/resolve/main/vae-ft-mse-840000-ema-pruned.safetensors /workspace/stable-diffusion-webui/models/VAE/vae-ft-mse-840000-ema-pruned.safetensors
 
 WORKDIR /workspace/stable-diffusion-webui
-ADD launcher.py /workspace/stable-diffusion-webui/
-ADD webui-user.sh /workspace/stable-diffusion-webui/
-ADD start.sh /start.sh
+COPY launcher.py /workspace/stable-diffusion-webui/
+COPY webui-user.sh /workspace/stable-diffusion-webui/
+COPY config.json /workspace/stable-diffusion-webui/
+COPY ui-config.json /workspace/stable-diffusion-webui/
+COPY start.sh /start.sh
 RUN chmod a+x /start.sh
 
 SHELL ["/bin/bash", "--login", "-c"]
