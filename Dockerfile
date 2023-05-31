@@ -38,6 +38,7 @@ RUN apt update && \
 
 # Install Python 3.10
 RUN add-apt-repository ppa:deadsnakes/ppa
+RUN apt update
 RUN apt install python3.10-dev python3.10-venv -y --no-install-recommends && \
 	ln -s /usr/bin/python3.10 /usr/bin/python && \
 	rm /usr/bin/python3 && \
@@ -47,14 +48,6 @@ RUN python3 get-pip.py && rm get-pip.py
 
 # Instell torch
 RUN pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-
-# Install Jupyter
-RUN pip3 install -U jupyterlab ipywidgets jupyter-archive jupyter_contrib_nbextensions
-RUN jupyter contrib nbextension install --user
-RUN jupyter nbextension enable --py widgetsnbextension
-
-# Install gdown
-RUN pip3 install gdown
 
 # Install runpodctl
 RUN wget https://github.com/runpod/runpodctl/releases/download/v1.10.0/runpodctl-linux-amd -O runpodctl && \
@@ -73,6 +66,14 @@ WORKDIR /workspace/stable-diffusion-webui
 RUN git reset v1.3.0 --hard
 RUN python -m venv /workspace/venv
 ENV PATH="/workspace/venv/bin:$PATH"
+
+# Install Jupyter
+RUN pip3 install -U jupyterlab ipywidgets jupyter-archive jupyter_contrib_nbextensions
+RUN jupyter contrib nbextension install --user
+RUN jupyter nbextension enable --py widgetsnbextension
+
+# Install gdown
+RUN pip3 install gdown
 
 WORKDIR /workspace/stable-diffusion-webui
 COPY requirements.txt ./requirements.txt
@@ -100,6 +101,7 @@ ADD https://huggingface.co/stabilityai/sd-vae-ft-mse-original/resolve/main/vae-f
 # Copy Stable Diffusion Web UI launcher and config files
 WORKDIR /workspace/stable-diffusion-webui
 COPY launcher.py /workspace/stable-diffusion-webui/
+RUN chmod +x launcher.py
 COPY webui-user.sh /workspace/stable-diffusion-webui/
 COPY config.json /workspace/stable-diffusion-webui/
 COPY ui-config.json /workspace/stable-diffusion-webui/
