@@ -46,9 +46,6 @@ RUN apt install python3.10-dev python3.10-venv -y --no-install-recommends && \
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 RUN python3 get-pip.py && rm get-pip.py
 
-# Instell torch
-RUN pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-
 # Install runpodctl
 RUN wget https://github.com/runpod/runpodctl/releases/download/v1.10.0/runpodctl-linux-amd -O runpodctl && \
     chmod a+x runpodctl && \
@@ -58,12 +55,15 @@ RUN wget https://github.com/runpod/runpodctl/releases/download/v1.10.0/runpodctl
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* && \
     echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
 
-# Install Stable Diffusion Web UI by Automatic1111
+# Clone the git repo of the Stable Diffusion Web UI by Automatic1111
 WORKDIR /workspace
 RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git
 
+# Set Stable Diffusion Web UI version to v1.3.0
 WORKDIR /workspace/stable-diffusion-webui
 RUN git reset v1.3.0 --hard
+
+# Create and use the Python venv
 RUN python -m venv /workspace/venv
 ENV PATH="/workspace/venv/bin:$PATH"
 
@@ -75,20 +75,26 @@ RUN jupyter nbextension enable --py widgetsnbextension
 # Install gdown
 RUN pip3 install gdown
 
+# Install torch 1.13.1 (no cu118 version available, so we use cu117 instead)
+RUN pip3 install torch==1.13.1 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu117
+RUN pip3 install https://huggingface.co/MonsterMMORPG/SECourses/resolve/main/xformers-0.0.19-cp310-cp310-manylinux2014_x86_64.whl
+
+# Install the dependencies for the Automatic1111 Stable Diffusion Web UI
 WORKDIR /workspace/stable-diffusion-webui
 COPY requirements.txt ./requirements.txt
 COPY requirements_versions.txt ./requirements_versions.txt
 COPY install.py ./install.py
 RUN python -m install --skip-torch-cuda-test
-RUN pip3 install torch==1.13.1 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-RUN pip3 install https://huggingface.co/MonsterMMORPG/SECourses/resolve/main/xformers-0.0.19-cp310-cp310-manylinux2014_x86_64.whl
 
-# Install Dreambooth Extension for Automatic1111 Web UI
+# Clone the git repo of the Dreambooth Extension for Automatic1111 Stable Diffusion Web UI
 WORKDIR /workspace/stable-diffusion-webui/extensions
 RUN git clone https://github.com/d8ahazard/sd_dreambooth_extension.git
 
+# Set Dreambooth extension version to 1.0.14
 WORKDIR /workspace/stable-diffusion-webui/extensions/sd_dreambooth_extension
 RUN git reset 1.0.14 --hard
+
+# Install the dependencies for the Dreambooth extension
 COPY requirements_dreambooth.txt ./requirements.txt
 RUN pip3 install -r requirements.txt
 
