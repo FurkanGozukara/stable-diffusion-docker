@@ -5,7 +5,6 @@ ENV DEBIAN_FRONTEND noninteractive\
     SHELL=/bin/bash
 
 # Create workspace working directory
-RUN mkdir -p /workspace
 WORKDIR /workspace
 
 # Install Ubuntu packages
@@ -37,14 +36,15 @@ RUN apt update && \
         update-ca-certificates
 
 # Install Python 3.10
-RUN add-apt-repository ppa:deadsnakes/ppa
-RUN apt update
-RUN apt install python3.10-dev python3.10-venv -y --no-install-recommends && \
+RUN add-apt-repository ppa:deadsnakes/ppa && \
+    apt update && \
+    apt install python3.10-dev python3.10-venv -y --no-install-recommends && \
 	ln -s /usr/bin/python3.10 /usr/bin/python && \
 	rm /usr/bin/python3 && \
-	ln -s /usr/bin/python3.10 /usr/bin/python3
-RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-RUN python3 get-pip.py && rm get-pip.py
+	ln -s /usr/bin/python3.10 /usr/bin/python3 && \
+    curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
+    python3 get-pip.py && \
+    rm get-pip.py
 
 # Install runpodctl
 RUN wget https://github.com/runpod/runpodctl/releases/download/v1.10.0/runpodctl-linux-amd -O runpodctl && \
@@ -52,32 +52,31 @@ RUN wget https://github.com/runpod/runpodctl/releases/download/v1.10.0/runpodctl
     mv runpodctl /usr/local/bin
 
 # Clean up
-RUN apt-get clean && rm -rf /var/lib/apt/lists/* && \
+RUN apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    pip cache purge && \
     echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
 
 # Clone the git repo of the Stable Diffusion Web UI by Automatic1111
+# and set version to v1.3.0
 WORKDIR /workspace
-RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git
-
-# Set Stable Diffusion Web UI version to v1.3.0
-WORKDIR /workspace/stable-diffusion-webui
-RUN git reset v1.3.0 --hard
+RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git && \
+    cd /workspace/stable-diffusion-webui && \
+    git reset v1.3.0 --hard
 
 # Create and use the Python venv
 RUN python -m venv /workspace/venv
 ENV PATH="/workspace/venv/bin:$PATH"
 
-# Install Jupyter
-RUN pip3 install -U jupyterlab ipywidgets jupyter-archive jupyter_contrib_nbextensions
-RUN jupyter contrib nbextension install --user
-RUN jupyter nbextension enable --py widgetsnbextension
+# Install Jupyter and gdown
+RUN pip3 install -U jupyterlab ipywidgets jupyter-archive jupyter_contrib_nbextensions && \
+    jupyter contrib nbextension install --user && \
+    jupyter nbextension enable --py widgetsnbextension && \
+    pip3 install gdown
 
-# Install gdown
-RUN pip3 install gdown
-
-# Install torch 1.13.1 (no cu118 version available, so we use cu117 instead)
-RUN pip3 install torch==1.13.1 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu117
-RUN pip3 install https://huggingface.co/MonsterMMORPG/SECourses/resolve/main/xformers-0.0.19-cp310-cp310-manylinux2014_x86_64.whl
+# Install torch 2.0.1
+RUN pip3 install torch==2.0.1 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
+    pip3 install xformers
 
 # Install the dependencies for the Automatic1111 Stable Diffusion Web UI
 WORKDIR /workspace/stable-diffusion-webui
@@ -86,13 +85,22 @@ COPY requirements_versions.txt ./requirements_versions.txt
 COPY install.py ./install.py
 RUN python -m install --skip-torch-cuda-test
 
-# Clone the git repo of the Dreambooth Extension for Automatic1111 Stable Diffusion Web UI
-WORKDIR /workspace/stable-diffusion-webui/extensions
-RUN git clone https://github.com/d8ahazard/sd_dreambooth_extension.git
+# Clone the Automatic1111 Extensions
+RUN git clone https://github.com/d8ahazard/sd_dreambooth_extension.git extensions/sd_dreambooth_extension && \
+    git clone https://github.com/deforum-art/sd-webui-deforum extensions/deforum && \
+    git clone https://github.com/Mikubill/sd-webui-controlnet.git extensions/sd-webui-controlnet
 
-# Set Dreambooth extension version to 1.0.14
+
+# Install depenencies fpr Deforum and Controlnet
+RUN cd /workspace/stable-diffusion-webui/extensions/deforum \
+    && pip3 install -r requirements.txt \
+    && cd /workspace/stable-diffusion-webui/extensions/sd-webui-controlnet \
+    && pip3 install -r requirements.txt
+
+# Set Dreambooth extension version to dev branch commit b46817bc73807848e726a3f79ef97e156e853928
 WORKDIR /workspace/stable-diffusion-webui/extensions/sd_dreambooth_extension
-RUN git reset 1.0.14 --hard
+RUN git checkout dev && \
+    git reset b46817bc73807848e726a3f79ef97e156e853928 --hard
 
 # Install the dependencies for the Dreambooth extension
 COPY requirements_dreambooth.txt ./requirements.txt
