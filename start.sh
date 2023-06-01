@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 echo "Container Started"
 export PYTHONUNBUFFERED=1
-source /venv/bin/activate
+source /workspace/venv/bin/activate
 
 if [ ! -e "/workspace/stable-diffusion-webui/models/Stable-diffusion/v1-5-pruned.safetensors" ]
 then
@@ -10,6 +10,7 @@ then
 fi
 
 if [ ! -e "/workspace/stable-diffusion-webui/models/VAE/vae-ft-mse-840000-ema-pruned.safetensors" ]
+then
     echo "Downloading VAE"
     wget -O /workspace/stable-diffusion-webui/models/VAE/vae-ft-mse-840000-ema-pruned.safetensors https://huggingface.co/stabilityai/sd-vae-ft-mse-original/resolve/main/vae-ft-mse-840000-ema-pruned.safetensors
 fi
