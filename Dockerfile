@@ -114,6 +114,12 @@ COPY webui-user.sh /workspace/stable-diffusion-webui/
 COPY config.json /workspace/stable-diffusion-webui/
 COPY ui-config.json /workspace/stable-diffusion-webui/
 
+# Add Stable Diffusion v1.5 model
+ADD https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/v1-5-pruned.safetensors /workspace/stable-diffusion-webui/models/Stable-diffusion/v1-5-pruned.safetensors
+
+# Add VAE
+ADD https://huggingface.co/stabilityai/sd-vae-ft-mse-original/resolve/main/vae-ft-mse-840000-ema-pruned.safetensors /workspace/stable-diffusion-webui/models/VAE/vae-ft-mse-840000-ema-pruned.safetensors
+
 # Set up the container startup script
 WORKDIR /
 COPY start.sh /start.sh

@@ -29,6 +29,9 @@ venv_dir="/workspace/venv"
 # install command for torch
 # export TORCH_COMMAND="pip install torch"
 
+# Disable Torch Dynamo which is known to cause issues on Linux
+export TORCHDYNAMO_DISABLE=1
+
 # Requirements file to use for stable-diffusion-webui
 #export REQS_FILE="./extensions/sd_dreambooth_extension/requirements.txt"
 
