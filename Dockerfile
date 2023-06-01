@@ -112,7 +112,7 @@ RUN mv /workspace/venv /venv
 
 # Copy Stable Diffusion Web UI launcher and config files
 COPY launcher.py /stable-diffusion-webui/
-RUN chmod +x launcher.py
+RUN chmod +x /stable-diffusion-webui/launcher.py
 COPY webui-user.sh /stable-diffusion-webui/
 COPY config.json /stable-diffusion-webui/
 COPY ui-config.json /stable-diffusion-webui/
