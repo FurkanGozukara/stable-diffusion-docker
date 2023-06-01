@@ -65,7 +65,7 @@ RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git && \
     git reset v1.3.0 --hard
 
 # Create and use the Python venv
-RUN python -m venv /workspace/venv
+RUN python3 -m venv /workspace/venv
 ENV PATH="/workspace/venv/bin:$PATH"
 
 # Install Jupyter and gdown
@@ -106,22 +106,24 @@ RUN git checkout dev && \
 COPY requirements_dreambooth.txt ./requirements.txt
 RUN pip3 install -r requirements.txt
 
-# Copy Stable Diffusion Web UI launcher and config files
 WORKDIR /workspace/stable-diffusion-webui
-COPY launcher.py /workspace/stable-diffusion-webui/
+RUN mv /workspace/stable-diffusion-webui /stable-diffusion-webui
+RUN mv /workspace/venv /venv
+
+# Copy Stable Diffusion Web UI launcher and config files
+COPY launcher.py /stable-diffusion-webui/
 RUN chmod +x launcher.py
-COPY webui-user.sh /workspace/stable-diffusion-webui/
-COPY config.json /workspace/stable-diffusion-webui/
-COPY ui-config.json /workspace/stable-diffusion-webui/
+COPY webui-user.sh /stable-diffusion-webui/
+COPY config.json /stable-diffusion-webui/
+COPY ui-config.json /stable-diffusion-webui/
 
 # Add Stable Diffusion v1.5 model
-ADD https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/v1-5-pruned.safetensors /workspace/stable-diffusion-webui/models/Stable-diffusion/v1-5-pruned.safetensors
+ADD https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/v1-5-pruned.safetensors /stable-diffusion-webui/models/Stable-diffusion/v1-5-pruned.safetensors
 
 # Add VAE
-ADD https://huggingface.co/stabilityai/sd-vae-ft-mse-original/resolve/main/vae-ft-mse-840000-ema-pruned.safetensors /workspace/stable-diffusion-webui/models/VAE/vae-ft-mse-840000-ema-pruned.safetensors
+ADD https://huggingface.co/stabilityai/sd-vae-ft-mse-original/resolve/main/vae-ft-mse-840000-ema-pruned.safetensors /stable-diffusion-webui/models/VAE/vae-ft-mse-840000-ema-pruned.safetensors
 
 # Set up the container startup script
-WORKDIR /
 COPY start.sh /start.sh
 RUN chmod a+x /start.sh
 

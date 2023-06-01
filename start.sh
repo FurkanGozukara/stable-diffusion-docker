@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
 echo "Container Started"
 export PYTHONUNBUFFERED=1
-source /workspace/venv/bin/activate
+source /venv/bin/activate
+
+echo "Syncing venv to workspace, please wait..."
+rsync -au --remove-source-files /venv/ /workspace/venv/
+
+echo "Syncing stable diffusion to workspace, please wait..."
+rsync -au --remove-source-files /stable-diffusion-webui/ /workspace/stable-diffusion-webui/
 
 if [[ ${RUNPOD_STOP_AUTO} ]]
 then
