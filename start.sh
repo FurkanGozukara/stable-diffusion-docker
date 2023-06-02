@@ -35,14 +35,14 @@ then
     ln -sf /root/welcome.ipynb /workspace
 
     cd /
-    jupyter lab --allow-root \
+    nohup jupyter lab --allow-root \
         --no-browser \
         --port=8888 \
         --ip=* \
         --ServerApp.terminado_settings='{"shell_command":["/bin/bash"]}' \
         --ServerApp.token=${JUPYTER_PASSWORD} \
         --ServerApp.allow_origin=* \
-        --ServerApp.preferred_dir=/workspace
+        --ServerApp.preferred_dir=/workspace &
     echo "Jupyter Lab Started"
 fi
 
