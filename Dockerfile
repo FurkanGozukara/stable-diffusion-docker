@@ -1,7 +1,6 @@
 ARG RUNTIME_IMAGE=nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
 ARG WEB_UI_VERSION=v1.3.0
 ARG DREAMBOOTH_VERSION=b46817bc73807848e726a3f79ef97e156e853928
-ARG TENSORBOARD_VERSION=2.13.0
 
 FROM ${RUNTIME_IMAGE} as runtime
 
@@ -118,7 +117,7 @@ RUN pip3 install -r requirements.txt
 
 # Install Tensorboard
 RUN pip3 uninstall -y tb-nightly tensorboardX tensorboard && \
-    pip3 install tensorboard==${TENSORBOARD_VERSION}
+    pip3 install tensorboard
 
 # Move the /workspace files to / so they don't conflict with Network Volumes
 # The start.sh script will rsync them.
