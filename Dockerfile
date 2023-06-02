@@ -121,14 +121,16 @@ RUN pip3 uninstall -y tb-nightly tensorboardX tensorboard && \
 
 # Move the /workspace files to / so they don't conflict with Network Volumes
 # The start.sh script will rsync them.
-WORKDIR /workspace/stable-diffusion-webui
+WORKDIR /workspace
 RUN mv /workspace/stable-diffusion-webui /stable-diffusion-webui
+RUN mv /workspace/kohya_ss /kohya_ss
 RUN mv /workspace/venv /venv
 
 # Copy Stable Diffusion Web UI launcher and config files
-COPY webui_launcher.py /stable-diffusion-webui/
-COPY kohya_ss_launcher.py /stable-diffusion-webui/
+COPY webui_launcher.py /stable-diffusion-webui/launcher.py
+COPY kohya_ss_launcher.py /kohya_ss/launcher.py
 RUN chmod +x /stable-diffusion-webui/launcher.py
+RUN chmod +x /kohya_ss/launcher.py
 COPY webui-user.sh /stable-diffusion-webui/
 COPY config.json /stable-diffusion-webui/
 COPY ui-config.json /stable-diffusion-webui/

@@ -8,8 +8,12 @@ echo "Syncing venv to workspace, please wait..."
 rsync -au --remove-source-files /venv/ /workspace/venv/
 
 # Sync Web UI to workspace to support Network volumes
-echo "Syncing stable diffusion to workspace, please wait..."
+echo "Syncing Stable Diffusion Web UI to workspace, please wait..."
 rsync -au --remove-source-files /stable-diffusion-webui/ /workspace/stable-diffusion-webui/
+
+# Sync Kohya_ss to workspace to support Network volumes
+echo "Syncing Kohya_ss to workspace, please wait..."
+rsync -au --remove-source-files /kohya_ss/ /workspace/kohya_ss/
 
 if [[ ${PUBLIC_KEY} ]]
 then
@@ -49,20 +53,19 @@ then
     echo ""
     echo "   Stable Diffusion Web UI:"
     echo "   ---------------------------------------------"
-    echo "   /workspace/webui_launcher.py"
+    echo "   /workspace/stable-diffusion-webui/launcher.py"
     echo ""
     echo "   Kohya_ss"
     echo "   ---------------------------------------------"
-    echo "   /workspace/kohya_ss_launcher.py"
+    echo "   /workspace/kohya_ss/launcher.py"
 else
-    cd /workspace
-
     echo "Starting Web UI through launcher script"
-    python webui_launcher.py &
+    cd /workspace/stable-diffusion-webui
+    python launcher.py &
 
     echo "Starting Kohya_ss through launcher script"
-    cd /workspace
-    python kohya_ss_launcher.py &
+    cd /workspace/kohya_ss
+    python launcher.py &
 fi
 
 if [ ${ENABLE_TENSORBOARD} ]; then
