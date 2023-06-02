@@ -1,4 +1,9 @@
-FROM nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04 as runtime
+ARG RUNTIME_IMAGE=nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
+ARG WEB_UI_VERSION=v1.3.0
+ARG DREAMBOOTH_VERSION=b46817bc73807848e726a3f79ef97e156e853928
+ARG TENSORBOARD_VERSION=2.13.0
+
+FROM ${RUNTIME_IMAGE} as runtime
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV DEBIAN_FRONTEND noninteractive\
@@ -38,7 +43,7 @@ RUN apt update && \
 # Install Python 3.10
 RUN add-apt-repository ppa:deadsnakes/ppa && \
     apt update && \
-    apt install python3.10-dev python3.10-venv -y --no-install-recommends && \
+    apt install python3.10-dev python3.10-venv python3-tk -y --no-install-recommends && \
 	ln -s /usr/bin/python3.10 /usr/bin/python && \
 	rm /usr/bin/python3 && \
 	ln -s /usr/bin/python3.10 /usr/bin/python3 && \
@@ -58,11 +63,11 @@ RUN apt-get clean && \
     echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
 
 # Clone the git repo of the Stable Diffusion Web UI by Automatic1111
-# and set version to v1.3.0
+# and set the desired version
 WORKDIR /workspace
 RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git && \
     cd /workspace/stable-diffusion-webui && \
-    git reset v1.3.0 --hard
+    git reset ${WEB_UI_VERSION} --hard
 
 # Create and use the Python venv
 RUN python3 -m venv /workspace/venv
@@ -74,9 +79,9 @@ RUN pip3 install -U jupyterlab ipywidgets jupyter-archive jupyter_contrib_nbexte
     jupyter nbextension enable --py widgetsnbextension && \
     pip3 install gdown
 
-# Install torch 2.0.1
-RUN pip3 install torch==2.0.1 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
-    pip3 install xformers
+# Install torch, xformers and tensorrt
+RUN pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
+    pip3 install xformers tensorrt
 
 # Install the dependencies for the Automatic1111 Stable Diffusion Web UI
 WORKDIR /workspace/stable-diffusion-webui
@@ -90,7 +95,6 @@ RUN git clone https://github.com/d8ahazard/sd_dreambooth_extension.git extension
     git clone https://github.com/deforum-art/sd-webui-deforum extensions/deforum && \
     git clone https://github.com/Mikubill/sd-webui-controlnet.git extensions/sd-webui-controlnet
 
-
 # Install depenencies fpr Deforum and Controlnet
 RUN cd /workspace/stable-diffusion-webui/extensions/deforum \
     && pip3 install -r requirements.txt \
@@ -100,12 +104,24 @@ RUN cd /workspace/stable-diffusion-webui/extensions/deforum \
 # Set Dreambooth extension version to dev branch commit b46817bc73807848e726a3f79ef97e156e853928
 WORKDIR /workspace/stable-diffusion-webui/extensions/sd_dreambooth_extension
 RUN git checkout dev && \
-    git reset b46817bc73807848e726a3f79ef97e156e853928 --hard
+    git reset ${DREAMBOOTH_VERSION} --hard
 
 # Install the dependencies for the Dreambooth extension
 COPY requirements_dreambooth.txt ./requirements.txt
 RUN pip3 install -r requirements.txt
 
+# Install Kohya_ss
+ENV TZ=Europe/London
+RUN git clone https://github.com/bmaltais/kohya_ss.git /workspace/kohya_ss
+WORKDIR /workspace/kohya_ss
+RUN pip3 install -r requirements.txt
+
+# Install Tensorboard
+RUN pip3 uninstall -y tb-nightly tensorboardX tensorboard && \
+    pip3 install tensorboard==${TENSORBOARD_VERSION}
+
+# Move the /workspace files to / so they don't conflict with Network Volumes
+# The start.sh script will rsync them.
 WORKDIR /workspace/stable-diffusion-webui
 RUN mv /workspace/stable-diffusion-webui /stable-diffusion-webui
 RUN mv /workspace/venv /venv

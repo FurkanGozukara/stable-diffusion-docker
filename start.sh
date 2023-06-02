@@ -3,20 +3,13 @@ echo "Container Started"
 export PYTHONUNBUFFERED=1
 source /venv/bin/activate
 
+# Sync venv to workspace to support Network volumes
 echo "Syncing venv to workspace, please wait..."
 rsync -au --remove-source-files /venv/ /workspace/venv/
 
+# Sync Web UI to workspace to support Network volumes
 echo "Syncing stable diffusion to workspace, please wait..."
 rsync -au --remove-source-files /stable-diffusion-webui/ /workspace/stable-diffusion-webui/
-
-if [[ ${RUNPOD_STOP_AUTO} ]]
-then
-    echo "Skipping auto-start of Web UI"
-else
-    echo "Started Web UI through launcher script"
-    cd /workspace/stable-diffusion-webui
-    python launcher.py &
-fi
 
 if [[ ${PUBLIC_KEY} ]]
 then
@@ -38,10 +31,49 @@ then
     ln -sf /root/welcome.ipynb /workspace
 
     cd /
-    jupyter lab --allow-root --no-browser --port=8888 --ip=* \
+    jupyter lab --allow-root \
+        --no-browser \
+        --port=8888 \
+        --ip=* \
         --ServerApp.terminado_settings='{"shell_command":["/bin/bash"]}' \
-        --ServerApp.token=${JUPYTER_PASSWORD} --ServerApp.allow_origin=* --ServerApp.preferred_dir=/workspace
+        --ServerApp.token=${JUPYTER_PASSWORD} \
+        --ServerApp.allow_origin=* \
+        --ServerApp.preferred_dir=/workspace
     echo "Jupyter Lab Started"
+fi
+
+if [[ ${DISABLE_AUTOLAUNCH} ]]
+then
+    echo "Auto launching is disabled so the applications not be started automatically"
+    echo "You can launch them manually using the launcher scripts:"
+    echo ""
+    echo "   Stable Diffusion Web UI:"
+    echo "   ---------------------------------------------"
+    echo "   /workspace/webui_launcher.py"
+    echo ""
+    echo "   Kohya_ss"
+    echo "   ---------------------------------------------"
+    echo "   /workspace/kohya_ss_launcher.py"
+else
+    cd /workspace
+
+    echo "Starting Web UI through launcher script"
+    python webui_launcher.py &
+
+    echo "Starting Kohya_ss through launcher script"
+    cd /workspace
+    python kohya_ss_launcher.py &
+fi
+
+if [ ${ENABLE_TENSORBOARD} ]; then
+    echo "Staring Tensorboard"
+    cd /workspace
+    mkdir -p /workspace/logs/ti
+    mkdir -p /workspace/logs/dreambooth
+    ln -s /workspace/stable-diffusion-webui/models/dreambooth /workspace/logs/dreambooth
+    ln -s /workspace/stable-diffusion-webui/textual_inversion /workspace/logs/ti
+    nohup tensorboard --logdir=/workspace/logs --port=6006 --host=0.0.0.0 &
+    echo "Tensorboard Started"
 fi
 
 sleep infinity
