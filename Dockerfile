@@ -116,7 +116,7 @@ RUN git clone https://github.com/bmaltais/kohya_ss.git /workspace/kohya_ss
 WORKDIR /workspace/kohya_ss
 RUN pip3 install -r requirements.txt
 
-# Install Tensorboard (usw the version that Kohya_ss requires to start)
+# Install Tensorboard (usw the version that Kohya_ss requires to start)g
 RUN pip3 uninstall -y tb-nightly tensorboardX tensorboard && \
     pip3 install tensorboard==${TENSORBOARD_VERSION}
 
