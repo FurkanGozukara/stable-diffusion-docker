@@ -1,7 +1,6 @@
 ARG RUNTIME_IMAGE=nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
 ARG WEB_UI_VERSION=v1.3.1
 ARG DREAMBOOTH_VERSION=b46817bc73807848e726a3f79ef97e156e853928
-ARG TENSORBOARD_VERSION=2.10.1
 
 FROM ${RUNTIME_IMAGE} as runtime
 
@@ -118,7 +117,7 @@ RUN pip3 install -r requirements.txt
 
 # Install Tensorboard (usw the version that Kohya_ss requires to start)g
 RUN pip3 uninstall -y tb-nightly tensorboardX tensorboard && \
-    pip3 install tensorboard==${TENSORBOARD_VERSION}
+    pip3 install tensorboard==2.10.1
 
 # Move the /workspace files to / so they don't conflict with Network Volumes
 # The start.sh script will rsync them.
