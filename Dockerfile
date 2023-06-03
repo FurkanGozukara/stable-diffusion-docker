@@ -2,7 +2,7 @@ ARG BUILDER_IMAGE=nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
 ARG RUNTIME_IMAGE=nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
 ARG VENV_PATH=/workspace/venv
 ARG WEB_UI_VERSION=v1.3.1
-ARG DREAMBOOTH_VERSION=b46817bc73807848e726a3f79ef97e156e853928
+ARG DREAMBOOTH_VERSION=1f5f355cf0369f160e69922ce0e0194da9007677
 
 ##############################################################
 # Builder Stage
@@ -90,7 +90,7 @@ RUN cd /workspace/stable-diffusion-webui/extensions/deforum \
     && cd /workspace/stable-diffusion-webui/extensions/sd-webui-controlnet \
     && pip3 install -r requirements.txt
 
-# Set Dreambooth extension version to dev branch commit b46817bc73807848e726a3f79ef97e156e853928
+# Set Dreambooth extension version to dev branch commit
 WORKDIR /workspace/stable-diffusion-webui/extensions/sd_dreambooth_extension
 RUN git checkout dev && \
     git reset ${DREAMBOOTH_VERSION} --hard
