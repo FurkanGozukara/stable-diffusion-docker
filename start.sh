@@ -45,6 +45,15 @@ then
     echo "Jupyter Lab Started"
 fi
 
+if [[ ${DOWNLOAD_MODELS} ]]
+then
+  # Download Stable Diffusion v1.5 model
+  wget -O /stable-diffusion-webui/models/Stable-diffusion/v1-5-pruned.safetensors  https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/v1-5-pruned.safetensors
+
+  # Download VAE
+  wget -O /stable-diffusion-webui/models/VAE/vae-ft-mse-840000-ema-pruned.safetensors https://huggingface.co/stabilityai/sd-vae-ft-mse-original/resolve/main/vae-ft-mse-840000-ema-pruned.safetensors
+fi
+
 if [[ ${DISABLE_AUTOLAUNCH} ]]
 then
     echo "Auto launching is disabled so the applications not be started automatically"
@@ -58,11 +67,12 @@ then
     echo "   ---------------------------------------------"
     echo "   /workspace/kohya_ss/launcher.py"
 else
-    echo "Starting Web UI through launcher script"
-    cd /workspace/stable-diffusion-webuilauncher.py &
+    mkdir -p /workspace/logs
+    echo "Starting Stable Diffusion Web UI"
+    cd /workspace/stable-diffusion-webui && nohup /workspace/stable-diffusion-webui/webui.sh -f > /workspace/logs/webui.log &
 
     echo "Starting Kohya_ss through launcher script"
-    /workspace/kohya_ss/launcher.py &
+    cd /workspace/kohya_ss && nohup ./gui.sh --listen 0.0.0.0 --headlesss --server_port 3010 > /workspace/logs/kohya_ss.log &
 fi
 
 if [ ${ENABLE_TENSORBOARD} ]; then

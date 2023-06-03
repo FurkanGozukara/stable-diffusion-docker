@@ -116,6 +116,12 @@ RUN source ${VENV_PATH}/bin/activate && \
     pip3 uninstall -y tb-nightly tensorboardX tensorboard && \
     pip3 install tensorboard==2.10.1
 
+# Clean up
+RUN apt clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    pip cache purge && \
+    echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+
 ##############################################################
 # Runtime Stage
 ##############################################################
@@ -192,7 +198,6 @@ RUN jupyter contrib nbextension install --user && \
 # Clean up
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
-    pip cache purge && \
     echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
 
 # Move the /workspace files to / so they don't conflict with Network Volumes
@@ -210,12 +215,6 @@ RUN chmod +x /kohya_ss/launcher.py
 COPY webui-user.sh /stable-diffusion-webui/
 COPY config.json /stable-diffusion-webui/
 COPY ui-config.json /stable-diffusion-webui/
-
-# Add Stable Diffusion v1.5 model
-ADD https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/v1-5-pruned.safetensors /stable-diffusion-webui/models/Stable-diffusion/v1-5-pruned.safetensors
-
-# Add VAE
-ADD https://huggingface.co/stabilityai/sd-vae-ft-mse-original/resolve/main/vae-ft-mse-840000-ema-pruned.safetensors /stable-diffusion-webui/models/VAE/vae-ft-mse-840000-ema-pruned.safetensors
 
 # Set up the container startup script
 COPY start.sh /start.sh
