@@ -166,6 +166,17 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         apt-transport-https ca-certificates && \
         update-ca-certificates
 
+# Install Python 3.10
+RUN add-apt-repository ppa:deadsnakes/ppa && \
+    apt update && \
+    apt install python3.10-dev python3.10-venv python3-tk -y --no-install-recommends && \
+	ln -s /usr/bin/python3.10 /usr/bin/python && \
+	rm /usr/bin/python3 && \
+	ln -s /usr/bin/python3.10 /usr/bin/python3 && \
+    curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
+    python3 get-pip.py && \
+    rm get-pip.py
+
 # Copy Python dependencies from builder to runtime
 COPY --from=builder ${VENV_PATH} ${VENV_PATH}
 ENV PATH="/workspace/venv/bin:$PATH"
