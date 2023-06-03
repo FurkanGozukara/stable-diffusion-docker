@@ -105,7 +105,7 @@ RUN source ${MAIN_VEV}/bin/activate && \
 
 # Fix Tensorboard
 RUN source ${MAIN_VEV}/bin/activate && \
-    pip3 uninstall -y tb-nightly &7 \
+    pip3 uninstall -y tb-nightly && \
     pip3 install --upgrade --force-reinstall tensorboard
 
 # Install Kohya_ss
