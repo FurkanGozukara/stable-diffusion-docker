@@ -20,6 +20,8 @@ RUN apt update && \
     apt -y upgrade && \
     apt install -y --no-install-recommends \
         software-properties-common \
+        python3-venv \
+        python3-tk \
         bash \
         git \
         openssh-server \
@@ -61,7 +63,7 @@ RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git && \
     git reset ${WEBUI_VERSION} --hard
 
 # Create and use the Python venv
-RUN python3 -m venv /workspace/venv
+    RUN python3 -m venv /workspace/venv
 ENV PATH="/workspace/venv/bin:$PATH"
 
 # Install Jupyter and gdown
