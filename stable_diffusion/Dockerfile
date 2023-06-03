@@ -101,9 +101,10 @@ RUN pip3 install -r requirements.txt
 
 # Install Kohya_ss
 ENV TZ=Africa/Johannesburg
-RUN git clone https://github.com/bmaltais/kohya_ss.git /workspace/kohya_ss && \
-    pip3 install -r requirements.txt && \
-    pip3 uninstall tb-nightly
+RUN git clone https://github.com/bmaltais/kohya_ss.git /workspace/kohya_ss
+COPY requirements_kohya.txt /workspace/kohya_ss/requirements.txt
+RUN pip3 install -r requirements.txt && \
+        pip3 uninstall tb-nightly
 
 # Move Stable Diffusion, Kohya_ss and venv to the root
 # so it doesn't conflict with Network Volumes
