@@ -88,11 +88,11 @@ RUN git clone https://github.com/d8ahazard/sd_dreambooth_extension.git extension
     git clone https://github.com/Mikubill/sd-webui-controlnet.git extensions/sd-webui-controlnet
 
 # Install depenencies fpr Deforum and Controlnet
-RUN cd /workspace/stable-diffusion-webui/extensions/deforum \
+RUN cd /workspace/stable-diffusion-webui/extensions/deforum && \
     source ${VENV_PATH}/bin/activate && \
-    && pip3 install -r requirements.txt \
-    && cd /workspace/stable-diffusion-webui/extensions/sd-webui-controlnet \
-    && pip3 install -r requirements.txt
+    pip3 install -r requirements.txt && \
+    cd /workspace/stable-diffusion-webui/extensions/sd-webui-controlnet && \
+    pip3 install -r requirements.txt
 
 # Set Dreambooth extension version to dev branch commit
 WORKDIR /workspace/stable-diffusion-webui/extensions/sd_dreambooth_extension
