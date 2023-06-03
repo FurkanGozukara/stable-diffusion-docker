@@ -207,11 +207,7 @@ RUN mv /workspace/stable-diffusion-webui /stable-diffusion-webui
 RUN mv /workspace/kohya_ss /kohya_ss
 RUN mv /workspace/venv /venv
 
-# Copy Stable Diffusion Web UI launcher and config files
-COPY webui_launcher.py /stable-diffusion-webui/launcher.py
-COPY kohya_ss_launcher.py /kohya_ss/launcher.py
-RUN chmod +x /stable-diffusion-webui/launcher.py
-RUN chmod +x /kohya_ss/launcher.py
+# Copy Stable Diffusion Web UI config files
 COPY webui-user.sh /stable-diffusion-webui/
 COPY config.json /stable-diffusion-webui/
 COPY ui-config.json /stable-diffusion-webui/
