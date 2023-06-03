@@ -119,7 +119,8 @@ RUN source ${VENV_PATH}/bin/activate && \
 # Clean up
 RUN apt clean && \
     rm -rf /var/lib/apt/lists/* && \
-    pip cache purge && \
+    source ${VENV_PATH}/bin/activate && \
+    pip3 cache purge && \
     echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
 
 ##############################################################
