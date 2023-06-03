@@ -59,11 +59,11 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 
 # Install core dependencies
 ADD root_requirements.txt /workspace
-RUN source ${MAIN_VENV_PATH}/bin/activate && \
+RUN source ${VENV_PATH}/bin/activate && \
     pip install --upgrade pip && \
     pip install -U -I torch torchvision torchaudio --extra-index-url "https://download.pytorch.org/whl/cu118" && \
     pip install --pre --no-deps xformers && \
-    pip install -r core_requirements.txt && deactivate
+    pip install -r core_requirements.txt
 
 # Clone the git repo of the Stable Diffusion Web UI by Automatic1111
 # and set the desired version
