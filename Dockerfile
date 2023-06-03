@@ -58,7 +58,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     python3 -m venv ${VENV_PATH}
 
 # Install core dependencies
-ADD root_requirements.txt /workspace
+ADD core_requirements.txt /workspace
 RUN source ${VENV_PATH}/bin/activate && \
     pip install --upgrade pip && \
     pip install -U -I torch torchvision torchaudio --extra-index-url "https://download.pytorch.org/whl/cu118" && \
