@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
+export MAIN_VEV=/workspace/venv
+export KOHYA_VEV=/workspace/kohya_ss/venv
 export PYTHONUNBUFFERED=1
-source /venv/bin/activate
+
+echo "Container is running"
 
 # Sync venv to workspace to support Network volumes
 echo "Syncing venv to workspace, please wait..."
@@ -56,32 +59,44 @@ then
     echo "   Stable Diffusion Web UI:"
     echo "   ---------------------------------------------"
     echo "   cd /workspace/stable-diffusion-webui"
+    echo "   deactivate && source /workspace/venv/activate"
     echo "   ./webui.sh -f"
     echo ""
     echo "   Kohya_ss"
     echo "   ---------------------------------------------"
     echo "   cd /workspace/kohya_ss"
+    echo "   deactivate"
     echo "   ./gui.sh --listen 0.0.0.0 --server_port 3010"
 else
     mkdir -p /workspace/logs
     echo "Starting Stable Diffusion Web UI"
+    source ${MAIN_VEV}/bin/activate
     cd /workspace/stable-diffusion-webui && nohup ./webui.sh -f > /workspace/logs/webui.log &
+    echo "Stable Diffusion Web UI started"
+    echo "Log file: /workspace/logs/webui.log"
+    deactivate
 
-    echo "Starting Kohya_ss through launcher script"
+    echo "Starting Kohya_ss Web UI"
+    source ${KOHYA_VEV}/bin/activate
     cd /workspace/kohya_ss && nohup ./gui.sh --listen 0.0.0.0 --headless --server_port 3010 > /workspace/logs/kohya_ss.log &
+    echo "Kohya_ss started"
+    echo "Log file: /workspace/logs/kohya_ss.log"
+    deactivate
 fi
 
 if [ ${ENABLE_TENSORBOARD} ]; then
-    echo "Staring Tensorboard"
+    echo "Starting Tensorboard"
     cd /workspace
     mkdir -p /workspace/logs/ti
     mkdir -p /workspace/logs/dreambooth
     ln -s /workspace/stable-diffusion-webui/models/dreambooth /workspace/logs/dreambooth
     ln -s /workspace/stable-diffusion-webui/textual_inversion /workspace/logs/ti
+    source ${MAIN_VEV}/bin/activate
     nohup tensorboard --logdir=/workspace/logs --port=6006 --host=0.0.0.0 &
+    deactivate
     echo "Tensorboard Started"
 fi
 
-echo "Container Started"
+echo "All services have been started"
 
 sleep infinity

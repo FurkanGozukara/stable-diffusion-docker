@@ -3,11 +3,14 @@ FROM ashleykza/pytorch:2.0.1-117 as runtime
 
 ARG WEBUI_VERSION=v1.3.1
 ARG DREAMBOOTH_VERSION=1.0.14
+ARG MAIN_VEV=/workspace/venv
+ARG KOHYA_VEV=/workspace/kohya_ss/venv
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV DEBIAN_FRONTEND noninteractive\
     SHELL=/bin/bash
 
+# Add Stable Diffusion 1.5 model and VAE
 RUN mkdir -p /sd-models
 COPY --from=sd-models /v1-5-pruned.safetensors /sd-models/v1-5-pruned.safetensors
 COPY --from=sd-models /vae-ft-mse-840000-ema-pruned.safetensors /sd-models/vae-ft-mse-840000-ema-pruned.safetensors
@@ -42,32 +45,29 @@ RUN apt update && \
         libcairo2-dev \
         libgoogle-perftools4 libtcmalloc-minimal4 \
         apt-transport-https ca-certificates && \
-        update-ca-certificates
+    update-ca-certificates && \
+    apt clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
 
 # Install runpodctl
 RUN wget https://github.com/runpod/runpodctl/releases/download/v1.10.0/runpodctl-linux-amd -O runpodctl && \
     chmod a+x runpodctl && \
     mv runpodctl /usr/local/bin
 
-# Clean up
-RUN apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    pip cache purge && \
-    echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
-
 # Clone the git repo of the Stable Diffusion Web UI by Automatic1111
-# and set version to v1.3.0
+# and set version
 WORKDIR /workspace
 RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git && \
     cd /workspace/stable-diffusion-webui && \
     git reset ${WEBUI_VERSION} --hard
 
-# Create and use the Python venv
-    RUN python3 -m venv /workspace/venv
-ENV PATH="/workspace/venv/bin:$PATH"
+# Create and use the main Python venv
+RUN python3 -m venv ${MAIN_VEV}
 
 # Install Jupyter and gdown
-RUN pip3 install -U jupyterlab ipywidgets jupyter-archive jupyter_contrib_nbextensions && \
+RUN source ${MAIN_VEV}/bin/activate && \
+    pip3 install -U jupyterlab ipywidgets jupyter-archive jupyter_contrib_nbextensions && \
     jupyter contrib nbextension install --user && \
     jupyter nbextension enable --py widgetsnbextension && \
     pip3 install gdown
@@ -77,7 +77,8 @@ WORKDIR /workspace/stable-diffusion-webui
 COPY requirements.txt ./requirements.txt
 COPY requirements_versions.txt ./requirements_versions.txt
 COPY install.py ./install.py
-RUN python -m install --skip-torch-cuda-test
+RUN source ${MAIN_VEV}/bin/activate && \
+    python -m install --skip-torch-cuda-test
 
 # Clone the Automatic1111 Extensions
 RUN git clone https://github.com/d8ahazard/sd_dreambooth_extension.git extensions/sd_dreambooth_extension && \
@@ -85,7 +86,8 @@ RUN git clone https://github.com/d8ahazard/sd_dreambooth_extension.git extension
     git clone https://github.com/Mikubill/sd-webui-controlnet.git extensions/sd-webui-controlnet
 
 # Install depenencies fpr Deforum and Controlnet
-RUN cd /workspace/stable-diffusion-webui/extensions/deforum \
+RUN source ${MAIN_VEV}/bin/activate && \
+    cd /workspace/stable-diffusion-webui/extensions/deforum \
     && pip3 install -r requirements.txt \
     && cd /workspace/stable-diffusion-webui/extensions/sd-webui-controlnet \
     && pip3 install -r requirements.txt
@@ -97,13 +99,23 @@ RUN git checkout dev && \
 
 # Install the dependencies for the Dreambooth extension
 COPY requirements_dreambooth.txt ./requirements.txt
-RUN pip3 install -r requirements.txt
+RUN source ${MAIN_VEV}/bin/activate && \
+    pip3 install -r requirements.txt && \
+    pip3 cache purge
+
+# Fix Tensorboard
+RUN source ${MAIN_VEV}/bin/activate && \
+    pip3 uninstall -y tb-nightly &7 \
+    pip3 install tensorboard
 
 # Install Kohya_ss
 ENV TZ=Africa/Johannesburg
 RUN git clone https://github.com/bmaltais/kohya_ss.git /workspace/kohya_ss
-COPY requirements_kohya.txt /workspace/kohya_ss/requirements.txt
-RUN pip3 install -r requirements.txt
+RUN python3 -m venv ${KOHYA_VEV} && \
+    source ${KOHYA_VEV}/bin/activate && \
+    pip3 install -r requirements.txt && \
+    pip3 install . && \
+    pip3 cache purge
 
 # Move Stable Diffusion, Kohya_ss and venv to the root
 # so it doesn't conflict with Network Volumes
