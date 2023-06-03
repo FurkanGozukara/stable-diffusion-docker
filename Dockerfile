@@ -167,8 +167,7 @@ ENV PATH="/workspace/venv/bin:$PATH"
 # Clone the git repo of the Stable Diffusion Web UI by Automatic1111
 # and set the desired version
 WORKDIR /workspace
-RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git && \
-    cd /workspace/stable-diffusion-webui && \
+RUN cd /workspace/stable-diffusion-webui && \
     git reset ${WEB_UI_VERSION} --hard
 
 # Clone the Automatic1111 Extensions
@@ -181,10 +180,6 @@ WORKDIR /workspace/stable-diffusion-webui/extensions/sd_dreambooth_extension
 RUN git checkout dev && \
     git reset ${DREAMBOOTH_VERSION} --hard
 
-# Install Kohya_ss
-ENV TZ=Europe/London
-RUN git clone https://github.com/bmaltais/kohya_ss.git /workspace/kohya_ss
-
 # Install runpodctl
 RUN wget https://github.com/runpod/runpodctl/releases/download/v1.10.0/runpodctl-linux-amd -O runpodctl && \
     chmod a+x runpodctl && \
@@ -192,7 +187,7 @@ RUN wget https://github.com/runpod/runpodctl/releases/download/v1.10.0/runpodctl
 
 # Install Jupyter
 RUN jupyter contrib nbextension install --user && \
-    jupyter nbextension enable --py widgetsnbextension &&
+    jupyter nbextension enable --py widgetsnbextension
 
 # Clean up
 RUN apt-get clean && \
