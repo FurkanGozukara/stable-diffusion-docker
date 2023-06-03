@@ -1,3 +1,4 @@
+FROM ashleykza/stable-diffusion-models:1.0.0 as sd-models
 FROM ashleyk/pytorch:2.0.1-117 as runtime
 
 ARG WEBUI_VERSION=v1.3.1
@@ -6,6 +7,10 @@ ARG DREAMBOOTH_VERSION=1.0.14
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV DEBIAN_FRONTEND noninteractive\
     SHELL=/bin/bash
+
+RUN mkdir -p /sd-models
+COPY --from=sd-models /v1-5-pruned.safetensors /sd-models/v1-5-pruned.safetensors
+COPY --from=sd-models /vae-ft-mse-840000-ema-pruned.safetensors /sd-models/vae-ft-mse-840000-ema-pruned.safetensors
 
 # Create workspace working directory
 WORKDIR /workspace
