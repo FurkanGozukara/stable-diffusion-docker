@@ -1,5 +1,5 @@
 FROM ashleykza/stable-diffusion-models:1.0.0 as sd-models
-FROM ashleyk/pytorch:2.0.1-117 as runtime
+FROM ashleykza/pytorch:2.0.1-117 as runtime
 
 ARG WEBUI_VERSION=v1.3.1
 ARG DREAMBOOTH_VERSION=1.0.14
@@ -99,9 +99,18 @@ RUN git checkout dev && \
 COPY requirements_dreambooth.txt ./requirements.txt
 RUN pip3 install -r requirements.txt
 
-WORKDIR /workspace/stable-diffusion-webui
-RUN mv /workspace/stable-diffusion-webui /stable-diffusion-webui
+# Install Kohya_ss
+ENV TZ=Africa/Johannesburg
+RUN git clone https://github.com/bmaltais/kohya_ss.git /workspace/kohya_ss && \
+    pip3 install -r requirements.txt && \
+    pip3 uninstall tb-nightly
+
+# Move Stable Diffusion, Kohya_ss and venv to the root
+# so it doesn't conflict with Network Volumes
+WORKDIR /workspace
 RUN mv /workspace/venv /venv
+RUN mv /workspace/kohya_ss /kohya_ss
+RUN mv /workspace/stable-diffusion-webui /stable-diffusion-webui
 
 # Copy Stable Diffusion Web UI config files
 COPY webui-user.sh /stable-diffusion-webui/

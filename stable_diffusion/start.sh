@@ -12,10 +12,10 @@ echo "Syncing Stable Diffusion Web UI to workspace, please wait..."
 rsync -au --remove-source-files /stable-diffusion-webui/ /workspace/stable-diffusion-webui/
 rm rf /stable-diffusion-webui
 
-## Sync Kohya_ss to workspace to support Network volumes
-#echo "Syncing Kohya_ss to workspace, please wait..."
-#rsync -au --remove-source-files /kohya_ss/ /workspace/kohya_ss/
-#rm -rf /kohya_ss
+# Sync Kohya_ss to workspace to support Network volumes
+echo "Syncing Kohya_ss to workspace, please wait..."
+rsync -au --remove-source-files /kohya_ss/ /workspace/kohya_ss/
+rm -rf /kohya_ss
 
 ln -s /sd-models/v1-5-pruned.safetensors /workspace/stable-diffusion-webui/models/Stable-diffusion/v1-5-pruned.safetensors
 ln -s /sd-models/vae-ft-mse-840000-ema-pruned.safetensors workspace/stable-diffusion-webui/models/VAE/vae-ft-mse-840000-ema-pruned.safetensors
@@ -57,18 +57,18 @@ then
     echo "   ---------------------------------------------"
     echo "   cd /workspace/stable-diffusion-webui"
     echo "   ./webui.sh -f"
-#    echo ""
-#    echo "   Kohya_ss"
-#    echo "   ---------------------------------------------"
-#    echo "   cd /workspace/kohya_ss"
-#    echo "   ./gui.sh --listen 0.0.0.0 --server_port 3010"
+    echo ""
+    echo "   Kohya_ss"
+    echo "   ---------------------------------------------"
+    echo "   cd /workspace/kohya_ss"
+    echo "   ./gui.sh --listen 0.0.0.0 --server_port 3010"
 else
     mkdir -p /workspace/logs
     echo "Starting Stable Diffusion Web UI"
     cd /workspace/stable-diffusion-webui && nohup ./webui.sh -f > /workspace/logs/webui.log &
-#
-#    echo "Starting Kohya_ss through launcher script"
-#    cd /workspace/kohya_ss && nohup ./gui.sh --listen 0.0.0.0 --headless --server_port 3010 > /workspace/logs/kohya_ss.log &
+
+    echo "Starting Kohya_ss through launcher script"
+    cd /workspace/kohya_ss && nohup ./gui.sh --listen 0.0.0.0 --headless --server_port 3010 > /workspace/logs/kohya_ss.log &
 fi
 
 if [ ${ENABLE_TENSORBOARD} ]; then
