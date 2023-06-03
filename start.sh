@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-echo "Container Started"
 export PYTHONUNBUFFERED=1
 source /venv/bin/activate
 
@@ -60,12 +59,10 @@ then
     echo "   /workspace/kohya_ss/launcher.py"
 else
     echo "Starting Web UI through launcher script"
-    cd /workspace/stable-diffusion-webui
-    python launcher.py &
+    cd /workspace/stable-diffusion-webuilauncher.py &
 
     echo "Starting Kohya_ss through launcher script"
-    cd /workspace/kohya_ss
-    python launcher.py &
+    /workspace/kohya_ss/launcher.py &
 fi
 
 if [ ${ENABLE_TENSORBOARD} ]; then
@@ -78,5 +75,7 @@ if [ ${ENABLE_TENSORBOARD} ]; then
     nohup tensorboard --logdir=/workspace/logs --port=6006 --host=0.0.0.0 &
     echo "Tensorboard Started"
 fi
+
+echo "Container Started"
 
 sleep infinity

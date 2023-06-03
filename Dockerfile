@@ -1,41 +1,44 @@
+ARG BUILDER_IMAGE=nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
 ARG RUNTIME_IMAGE=nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
+ARG VENV_PATH=/workspace/venv
 ARG WEB_UI_VERSION=v1.3.1
 ARG DREAMBOOTH_VERSION=b46817bc73807848e726a3f79ef97e156e853928
 
-FROM ${RUNTIME_IMAGE} as runtime
+##############################################################
+# Builder Stage
+##############################################################
+FROM ${BUILDER_IMAGE} as builder
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV DEBIAN_FRONTEND noninteractive\
     SHELL=/bin/bash
 
+# Don't write .pyc bytecode
+ENV PYTHONDONTWRITEBYTECODE=1
+
 # Create workspace working directory
+RUN mkdir -p /workspace
 WORKDIR /workspace
 
-# Install Ubuntu packages
+# Keep apt cache
 RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
-RUN apt update && \
+
+# Install Ubuntu packages
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt update && \
     apt -y upgrade && \
     apt install -y  --no-install-recommends \
         software-properties-common \
         bash \
         git \
-        openssh-server \
         libglib2.0-0 \
         libsm6 \
         libgl1 \
         libxrender1 \
         libxext6 \
-        ffmpeg \
-        wget \
-        curl \
-        psmisc \
-        rsync \
-        vim \
-        unzip \
-        htop \
         pkg-config \
         libcairo2-dev \
-        libgoogle-perftools4 libtcmalloc-minimal4 \
         apt-transport-https ca-certificates && \
         update-ca-certificates
 
@@ -50,16 +53,17 @@ RUN add-apt-repository ppa:deadsnakes/ppa && \
     python3 get-pip.py && \
     rm get-pip.py
 
-# Install runpodctl
-RUN wget https://github.com/runpod/runpodctl/releases/download/v1.10.0/runpodctl-linux-amd -O runpodctl && \
-    chmod a+x runpodctl && \
-    mv runpodctl /usr/local/bin
+# Create and use the Python venv
+RUN --mount=type=cache,target=/root/.cache/pip \
+    python3 -m venv ${VENV_PATH}
 
-# Clean up
-RUN apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    pip cache purge && \
-    echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+# Install core dependencies
+ADD root_requirements.txt /workspace
+RUN source ${MAIN_VENV_PATH}/bin/activate && \
+    pip install --upgrade pip && \
+    pip install -U -I torch torchvision torchaudio --extra-index-url "https://download.pytorch.org/whl/cu118" && \
+    pip install --pre --no-deps xformers && \
+    pip install -r core_requirements.txt && deactivate
 
 # Clone the git repo of the Stable Diffusion Web UI by Automatic1111
 # and set the desired version
@@ -67,20 +71,6 @@ WORKDIR /workspace
 RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git && \
     cd /workspace/stable-diffusion-webui && \
     git reset ${WEB_UI_VERSION} --hard
-
-# Create and use the Python venv
-RUN python3 -m venv /workspace/venv
-ENV PATH="/workspace/venv/bin:$PATH"
-
-# Install Jupyter and gdown
-RUN pip3 install -U jupyterlab ipywidgets jupyter-archive jupyter_contrib_nbextensions && \
-    jupyter contrib nbextension install --user && \
-    jupyter nbextension enable --py widgetsnbextension && \
-    pip3 install gdown
-
-# Install torch, xformers and tensorrt
-RUN pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
-    pip3 install xformers tensorrt
 
 # Install the dependencies for the Automatic1111 Stable Diffusion Web UI
 WORKDIR /workspace/stable-diffusion-webui
@@ -118,6 +108,91 @@ RUN pip3 install -r requirements.txt
 # Install Tensorboard (usw the version that Kohya_ss requires to start)g
 RUN pip3 uninstall -y tb-nightly tensorboardX tensorboard && \
     pip3 install tensorboard==2.10.1
+
+
+##############################################################
+# Runtime Stage
+##############################################################
+FROM ${RUNTIME_IMAGE} as runtime
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+ENV DEBIAN_FRONTEND noninteractive\
+    SHELL=/bin/bash
+
+# Python logs go strait to stdout/stderr w/o buffering
+ENV PYTHONUNBUFFERED=1
+
+# Don't write .pyc bytecode
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Install Ubuntu packages
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt update && \
+    apt -y upgrade && \
+    apt install -y  --no-install-recommends \
+        software-properties-common \
+        bash \
+        git \
+        openssh-server \
+        libglib2.0-0 \
+        libsm6 \
+        libgl1 \
+        libxrender1 \
+        libxext6 \
+        ffmpeg \
+        wget \
+        curl \
+        psmisc \
+        rsync \
+        vim \
+        unzip \
+        htop \
+        pkg-config \
+        libcairo2-dev \
+        libgoogle-perftools4 libtcmalloc-minimal4 \
+        apt-transport-https ca-certificates && \
+        update-ca-certificates
+
+# Copy Python dependencies from builder to runtime
+COPY --from=builder ${VENV_PATH} ${VENV_PATH}
+ENV PATH="/workspace/venv/bin:$PATH"
+
+# Clone the git repo of the Stable Diffusion Web UI by Automatic1111
+# and set the desired version
+WORKDIR /workspace
+RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git && \
+    cd /workspace/stable-diffusion-webui && \
+    git reset ${WEB_UI_VERSION} --hard
+
+# Clone the Automatic1111 Extensions
+RUN git clone https://github.com/d8ahazard/sd_dreambooth_extension.git extensions/sd_dreambooth_extension && \
+    git clone https://github.com/deforum-art/sd-webui-deforum extensions/deforum && \
+    git clone https://github.com/Mikubill/sd-webui-controlnet.git extensions/sd-webui-controlnet
+
+# Set Dreambooth extension version to dev branch commit
+WORKDIR /workspace/stable-diffusion-webui/extensions/sd_dreambooth_extension
+RUN git checkout dev && \
+    git reset ${DREAMBOOTH_VERSION} --hard
+
+# Install Kohya_ss
+ENV TZ=Europe/London
+RUN git clone https://github.com/bmaltais/kohya_ss.git /workspace/kohya_ss
+
+# Install runpodctl
+RUN wget https://github.com/runpod/runpodctl/releases/download/v1.10.0/runpodctl-linux-amd -O runpodctl && \
+    chmod a+x runpodctl && \
+    mv runpodctl /usr/local/bin
+
+# Clean up
+RUN apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    pip cache purge && \
+    echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+
+# Install Jupyter
+RUN jupyter contrib nbextension install --user && \
+    jupyter nbextension enable --py widgetsnbextension && \
 
 # Move the /workspace files to / so they don't conflict with Network Volumes
 # The start.sh script will rsync them.
