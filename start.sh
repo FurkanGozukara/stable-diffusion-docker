@@ -61,11 +61,13 @@ then
     echo ""
     echo "   Stable Diffusion Web UI:"
     echo "   ---------------------------------------------"
-    echo "   /workspace/stable-diffusion-webui/launcher.py"
+    echo "   cd /workspace/stable-diffusion-webui"
+    echo "   ./webui.sh -f"
     echo ""
     echo "   Kohya_ss"
     echo "   ---------------------------------------------"
-    echo "   /workspace/kohya_ss/launcher.py"
+    echo "   cd /workspace/kohya_ss"
+    echo "   ./gui.sh --listen 0.0.0.0 --server_port 3010"
 else
     mkdir -p /workspace/logs
     echo "Starting Stable Diffusion Web UI"
