@@ -5,24 +5,24 @@ source /venv/bin/activate
 # Sync venv to workspace to support Network volumes
 echo "Syncing venv to workspace, please wait..."
 rsync -au --remove-source-files /venv/ /workspace/venv/
+rm -rf /venv
 
 # Sync Web UI to workspace to support Network volumes
 echo "Syncing Stable Diffusion Web UI to workspace, please wait..."
 rsync -au --remove-source-files /stable-diffusion-webui/ /workspace/stable-diffusion-webui/
+rm rf /stable-diffusion-webui
 
 # Sync Kohya_ss to workspace to support Network volumes
 echo "Syncing Kohya_ss to workspace, please wait..."
 rsync -au --remove-source-files /kohya_ss/ /workspace/kohya_ss/
+rm -rf /kohya_ss
 
 if [[ ${PUBLIC_KEY} ]]
 then
     echo "Installing SSH public key"
     mkdir -p ~/.ssh
-    chmod 700 ~/.ssh
-    cd ~/.ssh
-    echo ${PUBLIC_KEY} >> authorized_keys
+    echo ${PUBLIC_KEY} >> ~/.ssh/authorized_keys
     chmod 700 -R ~/.ssh
-    cd /
     service ssh start
     echo "SSH Service Started"
 fi
@@ -45,15 +45,6 @@ then
     echo "Jupyter Lab Started"
 fi
 
-if [[ ${DOWNLOAD_MODELS} ]]
-then
-  # Download Stable Diffusion v1.5 model
-  wget -O /stable-diffusion-webui/models/Stable-diffusion/v1-5-pruned.safetensors  https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/v1-5-pruned.safetensors
-
-  # Download VAE
-  wget -O /stable-diffusion-webui/models/VAE/vae-ft-mse-840000-ema-pruned.safetensors https://huggingface.co/stabilityai/sd-vae-ft-mse-original/resolve/main/vae-ft-mse-840000-ema-pruned.safetensors
-fi
-
 if [[ ${DISABLE_AUTOLAUNCH} ]]
 then
     echo "Auto launching is disabled so the applications not be started automatically"
@@ -71,10 +62,10 @@ then
 else
     mkdir -p /workspace/logs
     echo "Starting Stable Diffusion Web UI"
-    cd /workspace/stable-diffusion-webui && nohup /workspace/stable-diffusion-webui/webui.sh -f > /workspace/logs/webui.log &
+    cd /workspace/stable-diffusion-webui && nohup ./webui.sh -f > /workspace/logs/webui.log &
 
     echo "Starting Kohya_ss through launcher script"
-    cd /workspace/kohya_ss && nohup ./gui.sh --listen 0.0.0.0 --headlesss --server_port 3010 > /workspace/logs/kohya_ss.log &
+    cd /workspace/kohya_ss && nohup ./gui.sh --listen 0.0.0.0 --headless --server_port 3010 > /workspace/logs/kohya_ss.log &
 fi
 
 if [ ${ENABLE_TENSORBOARD} ]; then

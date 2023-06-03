@@ -1,8 +1,0 @@
-colorama
-ipyevents
-ipywidgets
-jupyter-archive
-jupyter_contrib_nbextensions
-jupyterlab
-tensorrt
-gdown
