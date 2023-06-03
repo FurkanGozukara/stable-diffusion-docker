@@ -31,8 +31,8 @@ RUN ln -s /usr/bin/python3.10 /usr/bin/python && \
     rm -f get-pip.py
 
 # Install Python packages
-RUN pip install --no-cache-dir --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
-    pip install --no-cache-dir -U xformers jupyterlab ipywidgets jupyter-archive jupyter_contrib_nbextensions \
+RUN pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
+    pip install --no-cache-dir xformers jupyterlab ipywidgets jupyter-archive jupyter_contrib_nbextensions && \
     jupyter nbextension enable --py widgetsnbextension
 
 # Set up the container startup script
