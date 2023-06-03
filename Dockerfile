@@ -62,10 +62,10 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 # Install core dependencies
 ADD core_requirements.txt /workspace
 RUN source ${VENV_PATH}/bin/activate && \
-    pip install --upgrade pip && \
-    pip install -U -I torch torchvision torchaudio --extra-index-url "https://download.pytorch.org/whl/cu118" && \
-    pip install xformers && \
-    pip install -r /workspace/core_requirements.txt
+    pip3 install --upgrade pip && \
+    pip3 install -U -I torch torchvision torchaudio --extra-index-url "https://download.pytorch.org/whl/cu118" && \
+    pip3 install wheel xformers && \
+    pip3 install -r /workspace/core_requirements.txt
 
 # Clone the git repo of the Stable Diffusion Web UI by Automatic1111
 # and set the desired version
@@ -79,7 +79,7 @@ WORKDIR /workspace/stable-diffusion-webui
 COPY requirements.txt ./requirements.txt
 COPY requirements_versions.txt ./requirements_versions.txt
 COPY install.py ./install.py
-RUN python -m install --skip-torch-cuda-test
+RUN python3 -m install --skip-torch-cuda-test
 
 # Clone the Automatic1111 Extensions
 RUN git clone https://github.com/d8ahazard/sd_dreambooth_extension.git extensions/sd_dreambooth_extension && \
@@ -186,15 +186,15 @@ RUN wget https://github.com/runpod/runpodctl/releases/download/v1.10.0/runpodctl
     chmod a+x runpodctl && \
     mv runpodctl /usr/local/bin
 
+# Install Jupyter
+RUN jupyter contrib nbextension install --user && \
+    jupyter nbextension enable --py widgetsnbextension &&
+
 # Clean up
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     pip cache purge && \
     echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
-
-# Install Jupyter
-RUN jupyter contrib nbextension install --user && \
-    jupyter nbextension enable --py widgetsnbextension && \
 
 # Move the /workspace files to / so they don't conflict with Network Volumes
 # The start.sh script will rsync them.
