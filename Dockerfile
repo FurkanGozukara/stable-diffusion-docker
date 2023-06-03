@@ -32,6 +32,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         software-properties-common \
         bash \
         git \
+        curl  \
         libglib2.0-0 \
         libsm6 \
         libgl1 \
