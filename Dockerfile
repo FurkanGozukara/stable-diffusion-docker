@@ -1,13 +1,14 @@
 ARG BUILDER_IMAGE=nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
 ARG RUNTIME_IMAGE=nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
-ARG VENV_PATH=/workspace/venv
-ARG WEB_UI_VERSION=v1.3.1
-ARG DREAMBOOTH_VERSION=1f5f355cf0369f160e69922ce0e0194da9007677
 
 ##############################################################
 # Builder Stage
 ##############################################################
 FROM ${BUILDER_IMAGE} as builder
+
+ARG VENV_PATH=/workspace/venv
+ARG WEB_UI_VERSION=v1.3.1
+ARG DREAMBOOTH_VERSION=1f5f355cf0369f160e69922ce0e0194da9007677
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV DEBIAN_FRONTEND noninteractive\
@@ -63,8 +64,8 @@ ADD core_requirements.txt /workspace
 RUN source ${VENV_PATH}/bin/activate && \
     pip install --upgrade pip && \
     pip install -U -I torch torchvision torchaudio --extra-index-url "https://download.pytorch.org/whl/cu118" && \
-    pip install --pre --no-deps xformers && \
-    pip install -r core_requirements.txt
+    pip install xformers && \
+    pip install -r /workspace/core_requirements.txt
 
 # Clone the git repo of the Stable Diffusion Web UI by Automatic1111
 # and set the desired version
