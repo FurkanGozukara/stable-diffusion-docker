@@ -111,9 +111,11 @@ RUN source ${MAIN_VEV}/bin/activate && \
 # Install Kohya_ss
 ENV TZ=Africa/Johannesburg
 RUN git clone https://github.com/bmaltais/kohya_ss.git /workspace/kohya_ss
+WORKDIR /workspace/kohya_ss
 RUN python3 -m venv ${KOHYA_VEV} && \
     source ${KOHYA_VEV}/bin/activate && \
     pip3 install -r requirements.txt && \
+    pip3 install . && \
     pip3 cache purge
 
 # Move Stable Diffusion, Kohya_ss and venv to the root
