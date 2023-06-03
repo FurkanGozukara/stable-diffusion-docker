@@ -79,7 +79,8 @@ WORKDIR /workspace/stable-diffusion-webui
 COPY requirements.txt ./requirements.txt
 COPY requirements_versions.txt ./requirements_versions.txt
 COPY install.py ./install.py
-RUN python3 -m install --skip-torch-cuda-test
+RUN source ${VENV_PATH}/bin/activate && \
+    python3 -m install --skip-torch-cuda-test
 
 # Clone the Automatic1111 Extensions
 RUN git clone https://github.com/d8ahazard/sd_dreambooth_extension.git extensions/sd_dreambooth_extension && \
@@ -88,6 +89,7 @@ RUN git clone https://github.com/d8ahazard/sd_dreambooth_extension.git extension
 
 # Install depenencies fpr Deforum and Controlnet
 RUN cd /workspace/stable-diffusion-webui/extensions/deforum \
+    source ${VENV_PATH}/bin/activate && \
     && pip3 install -r requirements.txt \
     && cd /workspace/stable-diffusion-webui/extensions/sd-webui-controlnet \
     && pip3 install -r requirements.txt
@@ -99,18 +101,20 @@ RUN git checkout dev && \
 
 # Install the dependencies for the Dreambooth extension
 COPY requirements_dreambooth.txt ./requirements.txt
-RUN pip3 install -r requirements.txt
+RUN source ${VENV_PATH}/bin/activate && \
+    pip3 install -r requirements.txt
 
 # Install Kohya_ss
 ENV TZ=Europe/London
 RUN git clone https://github.com/bmaltais/kohya_ss.git /workspace/kohya_ss
 WORKDIR /workspace/kohya_ss
-RUN pip3 install -r requirements.txt
+RUN source ${VENV_PATH}/bin/activate && \
+    pip3 install -r requirements.txt
 
 # Install Tensorboard (usw the version that Kohya_ss requires to start)g
-RUN pip3 uninstall -y tb-nightly tensorboardX tensorboard && \
+RUN source ${VENV_PATH}/bin/activate && \
+    pip3 uninstall -y tb-nightly tensorboardX tensorboard && \
     pip3 install tensorboard==2.10.1
-
 
 ##############################################################
 # Runtime Stage
