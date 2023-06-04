@@ -36,8 +36,8 @@ RUN pip install --no-cache-dir torch torchvision torchaudio --index-url https://
     jupyter nbextension enable --py widgetsnbextension
 
 # Set up the container startup script
-COPY start.sh /workspace
-RUN chmod a+x /workspace/start.sh
+COPY start.sh /
+RUN chmod a+x /start.sh
 
 # Start the container
 CMD [ "/workspace/start.sh" ]
