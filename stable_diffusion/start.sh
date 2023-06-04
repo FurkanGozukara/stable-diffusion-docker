@@ -13,7 +13,7 @@ rm -rf /venv
 # Sync Web UI to workspace to support Network volumes
 echo "Syncing Stable Diffusion Web UI to workspace, please wait..."
 rsync -au --remove-source-files /stable-diffusion-webui/ /workspace/stable-diffusion-webui/
-rm rf /stable-diffusion-webui
+rm -rf /stable-diffusion-webui
 
 # Sync Kohya_ss to workspace to support Network volumes
 echo "Syncing Kohya_ss to workspace, please wait..."
