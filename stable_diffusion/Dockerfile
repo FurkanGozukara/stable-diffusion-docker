@@ -131,9 +131,9 @@ COPY config.json /stable-diffusion-webui/
 COPY ui-config.json /stable-diffusion-webui/
 
 # Set up the container startup script
-COPY start.sh /workspace/start.sh
-RUN chmod a+x /workspace/start.sh
+COPY start.sh /start.sh
+RUN chmod a+x /start.sh
 
 # Start the container
 SHELL ["/bin/bash", "--login", "-c"]
-CMD [ "/workspace/start.sh" ]
+CMD [ "/start.sh" ]
