@@ -1,11 +1,11 @@
 FROM ashleykza/stable-diffusion-models:1.0.0 as sd-models
-FROM ashleykza/pytorch:2.0.1-117 as runtime
+FROM nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04 as runtime
 
 ARG WEBUI_VERSION=v1.3.2
 ARG DREAMBOOTH_VERSION=1.0.14
 ARG KOHYA_VERSION=v21.7.3
-ARG MAIN_VEV=/workspace/venv
-ARG KOHYA_VEV=/workspace/kohya_ss/venv
+ARG MAIN_VENV=/workspace/venv
+ARG KOHYA_VENV=/workspace/kohya_ss/venv
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV DEBIAN_FRONTEND noninteractive\
@@ -54,6 +54,14 @@ RUN apt update && \
     rm -rf /var/lib/apt/lists/* && \
     echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
 
+# Set Python and pip
+RUN ln -s /usr/bin/python3.10 /usr/bin/python && \
+    curl https://bootstrap.pypa.io/get-pip.py | python && \
+    rm -f get-pip.py
+
+# Create and use the main Python venv
+RUN python3 -m venv ${MAIN_VENV}
+
 # Install runpodctl
 RUN wget https://github.com/runpod/runpodctl/releases/download/v1.10.0/runpodctl-linux-amd -O runpodctl && \
     chmod a+x runpodctl && \
@@ -67,7 +75,7 @@ RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git && \
     git reset ${WEBUI_VERSION} --hard
 
 # Install Jupyter and gdown
-RUN source ${MAIN_VEV}/bin/activate && \
+RUN source ${MAIN_VENV}/bin/activate && \
     pip3 install -U jupyterlab ipywidgets jupyter-archive jupyter_contrib_nbextensions && \
     jupyter contrib nbextension install --user && \
     jupyter nbextension enable --py widgetsnbextension && \
@@ -78,7 +86,7 @@ WORKDIR /workspace/stable-diffusion-webui
 COPY requirements.txt ./requirements.txt
 COPY requirements_versions.txt ./requirements_versions.txt
 COPY install.py ./install.py
-RUN source ${MAIN_VEV}/bin/activate && \
+RUN source ${MAIN_VENV}/bin/activate && \
     python -m install --skip-torch-cuda-test
 
 # Clone the Automatic1111 Extensions
@@ -87,7 +95,7 @@ RUN git clone https://github.com/d8ahazard/sd_dreambooth_extension.git extension
     git clone https://github.com/Mikubill/sd-webui-controlnet.git extensions/sd-webui-controlnet
 
 # Install depenencies fpr Deforum and Controlnet
-RUN source ${MAIN_VEV}/bin/activate && \
+RUN source ${MAIN_VENV}/bin/activate && \
     cd /workspace/stable-diffusion-webui/extensions/deforum \
     && pip3 install -r requirements.txt \
     && cd /workspace/stable-diffusion-webui/extensions/sd-webui-controlnet \
@@ -100,12 +108,12 @@ RUN git checkout dev && \
 
 # Install the dependencies for the Dreambooth extension
 COPY requirements_dreambooth.txt ./requirements.txt
-RUN source ${MAIN_VEV}/bin/activate && \
+RUN source ${MAIN_VENV}/bin/activate && \
     pip3 install -r requirements.txt && \
     pip3 cache purge
 
 # Fix Tensorboard
-RUN source ${MAIN_VEV}/bin/activate && \
+RUN source ${MAIN_VENV}/bin/activate && \
     pip3 uninstall -y tensorboard tb-nightly && \
     pip3 install tensorboard tensorflow
 
@@ -114,8 +122,8 @@ ENV TZ=Africa/Johannesburg
 RUN git clone https://github.com/bmaltais/kohya_ss.git /workspace/kohya_ss
 WORKDIR /workspace/kohya_ss
 RUN git checkout ${KOHYA_VERSION} && \
-    python3 -m venv ${KOHYA_VEV} && \
-    source ${KOHYA_VEV}/bin/activate && \
+    python3 -m venv ${KOHYA_VENV} && \
+    source ${KOHYA_VENV}/bin/activate && \
     pip3 install -r requirements.txt && \
     pip3 install . && \
     pip3 cache purge
