@@ -63,12 +63,8 @@ RUN python3 -m venv ${MAIN_VENV}
 RUN source ${MAIN_VENV}/bin/activate && \
     pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
     pip install --no-cache-dir xformers jupyterlab ipywidgets jupyter-archive jupyter_contrib_nbextensions && \
-    jupyter nbextension enable --py widgetsnbextension
-
-# Install runpodctl
-RUN wget https://github.com/runpod/runpodctl/releases/download/v1.10.0/runpodctl-linux-amd -O runpodctl && \
-    chmod a+x runpodctl && \
-    mv runpodctl /usr/local/bin
+    jupyter nbextension enable --py widgetsnbextension && \
+    deactivate
 
 # Clone the git repo of the Stable Diffusion Web UI by Automatic1111
 # and set version
@@ -81,7 +77,8 @@ RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git && \
 RUN source ${MAIN_VENV}/bin/activate && \
     jupyter contrib nbextension install --user && \
     jupyter nbextension enable --py widgetsnbextension && \
-    pip3 install gdown
+    pip3 install gdown && \
+    deactivate
 
 # Install the dependencies for the Automatic1111 Stable Diffusion Web UI
 WORKDIR /workspace/stable-diffusion-webui
@@ -89,7 +86,8 @@ COPY requirements.txt ./requirements.txt
 COPY requirements_versions.txt ./requirements_versions.txt
 COPY install.py ./install.py
 RUN source ${MAIN_VENV}/bin/activate && \
-    python -m install --skip-torch-cuda-test
+    python -m install --skip-torch-cuda-test && \
+    deactivate
 
 # Clone the Automatic1111 Extensions
 RUN git clone https://github.com/d8ahazard/sd_dreambooth_extension.git extensions/sd_dreambooth_extension && \
@@ -101,7 +99,8 @@ RUN source ${MAIN_VENV}/bin/activate && \
     cd /workspace/stable-diffusion-webui/extensions/deforum \
     && pip3 install -r requirements.txt \
     && cd /workspace/stable-diffusion-webui/extensions/sd-webui-controlnet \
-    && pip3 install -r requirements.txt
+    && pip3 install -r requirements.txt && \
+    deactivate
 
 # Set Dreambooth extension version
 WORKDIR /workspace/stable-diffusion-webui/extensions/sd_dreambooth_extension
@@ -112,12 +111,14 @@ RUN git checkout dev && \
 COPY requirements_dreambooth.txt ./requirements.txt
 RUN source ${MAIN_VENV}/bin/activate && \
     pip3 install -r requirements.txt && \
-    pip3 cache purge
+    deactivate
 
 # Fix Tensorboard
 RUN source ${MAIN_VENV}/bin/activate && \
     pip3 uninstall -y tensorboard tb-nightly && \
-    pip3 install tensorboard tensorflow
+    pip3 install tensorboard tensorflow && \
+    pip3 cache purge && \
+    deactivate
 
 # Install Kohya_ss
 ENV TZ=Africa/Johannesburg
@@ -128,7 +129,13 @@ RUN git checkout ${KOHYA_VERSION} && \
     source ${KOHYA_VENV}/bin/activate && \
     pip3 install -r requirements.txt && \
     pip3 install . && \
-    pip3 cache purge
+    pip3 cache purge && \
+    deactivate
+
+# Install runpodctl
+RUN wget https://github.com/runpod/runpodctl/releases/download/v1.10.0/runpodctl-linux-amd -O runpodctl && \
+    chmod a+x runpodctl && \
+    mv runpodctl /usr/local/bin
 
 # Move Stable Diffusion, Kohya_ss and venv to the root
 # so it doesn't conflict with Network Volumes
