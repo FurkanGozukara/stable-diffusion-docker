@@ -63,7 +63,6 @@ RUN python3 -m venv ${MAIN_VENV}
 RUN source ${MAIN_VENV}/bin/activate && \
     pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
     pip install --no-cache-dir xformers && \
-    jupyter nbextension enable --py widgetsnbextension && \
     deactivate
 
 # Clone the git repo of the Stable Diffusion Web UI by Automatic1111
