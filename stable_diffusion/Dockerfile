@@ -19,9 +19,6 @@ COPY --from=sd-models /vae-ft-mse-840000-ema-pruned.safetensors /sd-models/vae-f
 # Create workspace working directory
 WORKDIR /workspace
 
-# Add Torch venv
-COPY --from=runtime /venv /workspace/venv
-
 # Install Ubuntu packages
 RUN apt update && \
     apt -y upgrade && \
