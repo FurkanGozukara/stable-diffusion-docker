@@ -40,6 +40,7 @@ then
     ln -sf /root/welcome.ipynb /workspace
 
     cd /
+    source ${MAIN_VEV}/bin/activate
     nohup jupyter lab --allow-root \
         --no-browser \
         --port=8888 \
@@ -49,6 +50,7 @@ then
         --ServerApp.allow_origin=* \
         --ServerApp.preferred_dir=/workspace &
     echo "Jupyter Lab Started"
+    deactivate
 fi
 
 if [[ ${DISABLE_AUTOLAUNCH} ]]
