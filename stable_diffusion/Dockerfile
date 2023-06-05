@@ -59,10 +59,10 @@ RUN ln -s /usr/bin/python3.10 /usr/bin/python && \
 # Create and use the main Python venv
 RUN python3 -m venv ${MAIN_VENV}
 
-# Install Torch and Jupyter
+# Install Torch
 RUN source ${MAIN_VENV}/bin/activate && \
     pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
-    pip install --no-cache-dir xformers jupyterlab ipywidgets jupyter-archive jupyter_contrib_nbextensions && \
+    pip install --no-cache-dir xformers && \
     jupyter nbextension enable --py widgetsnbextension && \
     deactivate
 
@@ -75,6 +75,7 @@ RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git && \
 
 # Complete Jupyter installation
 RUN source ${MAIN_VENV}/bin/activate && \
+    pip3 install jupyterlab ipywidgets jupyter-archive jupyter_contrib_nbextensions && \
     jupyter contrib nbextension install --user && \
     jupyter nbextension enable --py widgetsnbextension && \
     pip3 install gdown && \
