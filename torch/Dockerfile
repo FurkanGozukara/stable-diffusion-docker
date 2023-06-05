@@ -40,4 +40,4 @@ COPY start.sh /
 RUN chmod a+x /start.sh
 
 # Start the container
-CMD [ "/workspace/start.sh" ]
+CMD [ "/start.sh" ]
