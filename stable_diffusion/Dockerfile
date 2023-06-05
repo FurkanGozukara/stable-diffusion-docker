@@ -59,6 +59,12 @@ RUN ln -s /usr/bin/python3.10 /usr/bin/python && \
 # Create and use the main Python venv
 RUN python3 -m venv ${MAIN_VENV}
 
+# Install Torch and Jupyter
+RUN source ${MAIN_VENV} && \
+    pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
+    pip install --no-cache-dir xformers jupyterlab ipywidgets jupyter-archive jupyter_contrib_nbextensions && \
+    jupyter nbextension enable --py widgetsnbextension
+
 # Install runpodctl
 RUN wget https://github.com/runpod/runpodctl/releases/download/v1.10.0/runpodctl-linux-amd -O runpodctl && \
     chmod a+x runpodctl && \
@@ -71,9 +77,8 @@ RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git && \
     cd /workspace/stable-diffusion-webui && \
     git reset ${WEBUI_VERSION} --hard
 
-# Install Jupyter and gdown
+# Complete Jupyter installation
 RUN source ${MAIN_VENV}/bin/activate && \
-    pip3 install -U jupyterlab ipywidgets jupyter-archive jupyter_contrib_nbextensions && \
     jupyter contrib nbextension install --user && \
     jupyter nbextension enable --py widgetsnbextension && \
     pip3 install gdown
