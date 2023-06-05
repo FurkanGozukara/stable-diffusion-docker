@@ -19,6 +19,9 @@ COPY --from=sd-models /vae-ft-mse-840000-ema-pruned.safetensors /sd-models/vae-f
 # Create workspace working directory
 WORKDIR /workspace
 
+# Add Torch venv
+COPY --from=runtime /venv /workspace/venv
+
 # Install Ubuntu packages
 RUN apt update && \
     apt -y upgrade && \
@@ -62,9 +65,6 @@ WORKDIR /workspace
 RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git && \
     cd /workspace/stable-diffusion-webui && \
     git reset ${WEBUI_VERSION} --hard
-
-# Create and use the main Python venv
-RUN python3 -m venv ${MAIN_VEV}
 
 # Install Jupyter and gdown
 RUN source ${MAIN_VEV}/bin/activate && \

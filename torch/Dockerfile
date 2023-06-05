@@ -30,10 +30,17 @@ RUN ln -s /usr/bin/python3.10 /usr/bin/python && \
     curl https://bootstrap.pypa.io/get-pip.py | python && \
     rm -f get-pip.py
 
+# Create and use the main Python venv
+RUN python3 -m venv /workspace/venv
+
 # Install Python packages
-RUN pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
+RUN source /workspace/venv/bin/activate && \
+    pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
     pip install --no-cache-dir xformers jupyterlab ipywidgets jupyter-archive jupyter_contrib_nbextensions && \
     jupyter nbextension enable --py widgetsnbextension
+
+# Move venv to root to support Network volumes
+RUN mv /workspace/venv /venv
 
 # Set up the container startup script
 COPY start.sh /
