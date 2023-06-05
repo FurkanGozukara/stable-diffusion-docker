@@ -78,7 +78,7 @@ else
 
     echo "Starting Kohya_ss Web UI"
     source ${KOHYA_VEV}/bin/activate
-    cd /workspace/kohya_ss && nohup ./gui.sh --listen 0.0.0.0 --headless --server_port 3010 > /workspace/logs/kohya_ss.log &
+    cd /workspace/kohya_ss && nohup ./gui.sh --listen 0.0.0.0 --server_port 3010 > /workspace/logs/kohya_ss.log &
     echo "Kohya_ss started"
     echo "Log file: /workspace/logs/kohya_ss.log"
     deactivate

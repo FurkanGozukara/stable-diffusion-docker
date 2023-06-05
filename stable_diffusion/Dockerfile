@@ -1,8 +1,9 @@
 FROM ashleykza/stable-diffusion-models:1.0.0 as sd-models
 FROM ashleykza/pytorch:2.0.1-117 as runtime
 
-ARG WEBUI_VERSION=v1.3.1
+ARG WEBUI_VERSION=v1.3.2
 ARG DREAMBOOTH_VERSION=1.0.14
+ARG KOHYA_VERSION=v21.7.3
 ARG MAIN_VEV=/workspace/venv
 ARG KOHYA_VEV=/workspace/kohya_ss/venv
 
@@ -105,14 +106,15 @@ RUN source ${MAIN_VEV}/bin/activate && \
 
 # Fix Tensorboard
 RUN source ${MAIN_VEV}/bin/activate && \
-    pip3 uninstall -y tb-nightly && \
-    pip3 install --upgrade --force-reinstall tensorboard tensorflow
+    pip3 uninstall -y tensorboard tb-nightly && \
+    pip3 install tensorboard tensorflow
 
 # Install Kohya_ss
 ENV TZ=Africa/Johannesburg
 RUN git clone https://github.com/bmaltais/kohya_ss.git /workspace/kohya_ss
 WORKDIR /workspace/kohya_ss
-RUN python3 -m venv ${KOHYA_VEV} && \
+RUN git checkout ${KOHYA_VERSION} && \
+    python3 -m venv ${KOHYA_VEV} && \
     source ${KOHYA_VEV}/bin/activate && \
     pip3 install -r requirements.txt && \
     pip3 install . && \
