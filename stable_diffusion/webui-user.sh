@@ -10,8 +10,8 @@ install_dir="/workspace"
 #clone_dir="stable-diffusion-webui"
 
 # Commandline arguments for webui.py, for example: export COMMANDLINE_ARGS="--medvram --opt-split-attention"
-# xformers is disabled to improve Dreambooth treaining, add --xformers below to enable it.
-export COMMANDLINE_ARGS="--port 3000 --skip-install --listen --api --enable-insecure-extension-access"
+# xformers is enabled to to generate Dreambooth class images, its better to disable it for training if you can.
+export COMMANDLINE_ARGS="--port 3000 --skip-install --listen --api --xformers --enable-insecure-extension-access"
 #export XFORMERS_PACKAGE="xformers==0.0.17.dev447"
 
 # python3 executable

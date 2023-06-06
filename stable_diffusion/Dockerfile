@@ -28,6 +28,8 @@ RUN apt update && \
         python3-tk \
         bash \
         git \
+        ncdu \
+        net-tools \
         openssh-server \
         libglib2.0-0 \
         libsm6 \
