@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-export MAIN_VEV=/workspace/venv
-export KOHYA_VEV=/workspace/kohya_ss/venv
+export MAIN_VENV=/workspace/venv
+export KOHYA_VENV=/workspace/kohya_ss/venv
 export PYTHONUNBUFFERED=1
 
 echo "Container is running"
@@ -40,7 +40,7 @@ then
     ln -sf /root/welcome.ipynb /workspace
 
     cd /
-    source ${MAIN_VEV}/bin/activate
+    source ${MAIN_VENV}/bin/activate
     nohup jupyter lab --allow-root \
         --no-browser \
         --port=8888 \
@@ -72,14 +72,14 @@ then
 else
     mkdir -p /workspace/logs
     echo "Starting Stable Diffusion Web UI"
-    source ${MAIN_VEV}/bin/activate
+    source ${MAIN_VENV}/bin/activate
     cd /workspace/stable-diffusion-webui && nohup ./webui.sh -f > /workspace/logs/webui.log &
     echo "Stable Diffusion Web UI started"
     echo "Log file: /workspace/logs/webui.log"
     deactivate
 
     echo "Starting Kohya_ss Web UI"
-    source ${KOHYA_VEV}/bin/activate
+    source ${KOHYA_VENV}/bin/activate
     cd /workspace/kohya_ss && nohup ./gui.sh --listen 0.0.0.0 --server_port 3010 > /workspace/logs/kohya_ss.log &
     echo "Kohya_ss started"
     echo "Log file: /workspace/logs/kohya_ss.log"
@@ -93,7 +93,7 @@ if [ ${ENABLE_TENSORBOARD} ]; then
     mkdir -p /workspace/logs/dreambooth
     ln -s /workspace/stable-diffusion-webui/models/dreambooth /workspace/logs/dreambooth
     ln -s /workspace/stable-diffusion-webui/textual_inversion /workspace/logs/ti
-    source ${MAIN_VEV}/bin/activate
+    source ${MAIN_VENV}/bin/activate
     nohup tensorboard --logdir=/workspace/logs --port=6006 --host=0.0.0.0 &
     deactivate
     echo "Tensorboard Started"
