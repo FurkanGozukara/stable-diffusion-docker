@@ -2,7 +2,7 @@ FROM ashleykza/stable-diffusion-models:1.0.0 as sd-models
 FROM nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04 as runtime
 
 ARG WEBUI_VERSION=v1.3.2
-ARG DREAMBOOTH_VERSION=1.0.14
+ARG DREAMBOOTH_COMMIT=dc413a14379b165355502d9f65856c40a4bb5b6f
 ARG KOHYA_VERSION=v21.7.6
 ARG MAIN_VENV=/workspace/venv
 ARG KOHYA_VENV=/workspace/kohya_ss/venv
@@ -94,20 +94,21 @@ RUN source ${MAIN_VENV}/bin/activate && \
 # Clone the Automatic1111 Extensions
 RUN git clone https://github.com/d8ahazard/sd_dreambooth_extension.git extensions/sd_dreambooth_extension && \
     git clone https://github.com/deforum-art/sd-webui-deforum extensions/deforum && \
-    git clone https://github.com/Mikubill/sd-webui-controlnet.git extensions/sd-webui-controlnet
+    git clone https://github.com/Mikubill/sd-webui-controlnet.git extensions/sd-webui-controlnet && \
+    git clone https://github.com/kohya-ss/sd-webui-additional-networks
 
-# Install depenencies fpr Deforum and Controlnet
+# Install depenencies for Deforum and ControlNet
 RUN source ${MAIN_VENV}/bin/activate && \
-    cd /workspace/stable-diffusion-webui/extensions/deforum \
-    && pip3 install -r requirements.txt \
-    && cd /workspace/stable-diffusion-webui/extensions/sd-webui-controlnet \
-    && pip3 install -r requirements.txt && \
+    cd /workspace/stable-diffusion-webui/extensions/deforum && \
+    pip3 install -r requirements.txt && \
+    cd /workspace/stable-diffusion-webui/extensions/sd-webui-controlnet && \
+    pip3 install -r requirements.txt && \
     deactivate
 
 # Set Dreambooth extension version
 WORKDIR /workspace/stable-diffusion-webui/extensions/sd_dreambooth_extension
-RUN git checkout dev && \
-    git reset ${DREAMBOOTH_VERSION} --hard
+RUN git checkout main && \
+    git reset ${DREAMBOOTH_COMMIT} --hard
 
 # Install the dependencies for the Dreambooth extension
 COPY requirements_dreambooth.txt ./requirements.txt
