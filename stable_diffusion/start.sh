@@ -55,7 +55,7 @@ fi
 
 if [[ ${DISABLE_AUTOLAUNCH} ]]
 then
-    echo "Auto launching is disabled so the applications not be started automatically"
+    echo "Auto launching is disabled so the applications will not be started automatically"
     echo "You can launch them manually using the launcher scripts:"
     echo ""
     echo "   Stable Diffusion Web UI:"
