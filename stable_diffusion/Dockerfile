@@ -96,7 +96,7 @@ RUN git clone https://github.com/d8ahazard/sd_dreambooth_extension.git extension
     git clone https://github.com/deforum-art/sd-webui-deforum extensions/deforum && \
     git clone https://github.com/Mikubill/sd-webui-controlnet.git extensions/sd-webui-controlnet && \
     git clone https://github.com/kohya-ss/sd-webui-additional-networks && \
-    git clone https://github.com/KohakuBlueleaf/a1111-sd-webui-locon
+    git clone https://github.com/ashleykleynhans/a1111-sd-webui-locon
 
 # Install depenencies for Deforum and ControlNet
 RUN source ${MAIN_VENV}/bin/activate && \
