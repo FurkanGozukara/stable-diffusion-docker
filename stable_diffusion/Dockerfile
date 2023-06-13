@@ -3,7 +3,7 @@ FROM nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04 as runtime
 
 ARG WEBUI_VERSION=v1.3.2
 ARG DREAMBOOTH_COMMIT=dc413a14379b165355502d9f65856c40a4bb5b6f
-ARG KOHYA_VERSION=v21.7.6
+ARG KOHYA_VERSION=v21.7.7
 ARG MAIN_VENV=/workspace/venv
 ARG KOHYA_VENV=/workspace/kohya_ss/venv
 
