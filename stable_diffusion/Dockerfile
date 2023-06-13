@@ -1,5 +1,5 @@
 FROM ashleykza/stable-diffusion-models:1.0.0 as sd-models
-FROM nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04 as runtime
+FROM nvidia/cuda:12.1.1-cudnn8-devel-ubuntu22.04 as runtime
 
 ARG WEBUI_VERSION=v1.3.2
 ARG DREAMBOOTH_COMMIT=dc413a14379b165355502d9f65856c40a4bb5b6f
@@ -63,7 +63,7 @@ RUN python3 -m venv ${MAIN_VENV}
 
 # Install Torch
 RUN source ${MAIN_VENV}/bin/activate && \
-    pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
+    pip install --no-cache-dir torch torchvision torchaudio && \
     pip install --no-cache-dir xformers && \
     deactivate
 
