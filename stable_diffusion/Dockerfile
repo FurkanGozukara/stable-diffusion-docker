@@ -76,7 +76,7 @@ RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git && \
 
 # Complete Jupyter installation
 RUN source ${MAIN_VENV}/bin/activate && \
-    pip3 install jupyterlab ipywidgets jupyter-archive jupyter_contrib_nbextensions && \
+    pip3 install jupyterlab ipywidgets jupyter_contrib_nbextensions && \
     jupyter contrib nbextension install --user && \
     jupyter nbextension enable --py widgetsnbextension && \
     pip3 install gdown && \
