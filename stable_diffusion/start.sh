@@ -20,7 +20,7 @@ echo "Syncing Kohya_ss to workspace, please wait..."
 rsync -au --remove-source-files /kohya_ss/ /workspace/kohya_ss/
 rm -rf /kohya_ss
 
-ln -s /sd-models/v1-5-pruned.safetensors /workspace/stable-diffusion-webui/models/Stable-diffusion/v1-5-pruned.safetensors
+ln -s /sd-models/Realistic_Vision_V2.0.safetensors /workspace/stable-diffusion-webui/models/Stable-diffusion/Realistic_Vision_V2.0.safetensors
 ln -s /sd-models/vae-ft-mse-840000-ema-pruned.safetensors workspace/stable-diffusion-webui/models/VAE/vae-ft-mse-840000-ema-pruned.safetensors
 
 if [[ ${PUBLIC_KEY} ]]
