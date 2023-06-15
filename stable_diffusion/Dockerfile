@@ -13,7 +13,7 @@ ENV DEBIAN_FRONTEND noninteractive\
 
 # Add Stable Diffusion 1.5 model and VAE
 RUN mkdir -p /sd-models
-COPY --from=sd-models /v1-5-pruned.safetensors /sd-models/v1-5-pruned.safetensors
+COPY --from=sd-models /Realistic_Vision_V2.0.safetensors /sd-models/Realistic_Vision_V2.0.safetensors
 COPY --from=sd-models /vae-ft-mse-840000-ema-pruned.safetensors /sd-models/vae-ft-mse-840000-ema-pruned.safetensors
 
 # Create workspace working directory
@@ -48,6 +48,7 @@ RUN apt update && \
         libcairo2-dev \
         libgoogle-perftools4 libtcmalloc-minimal4 \
         apt-transport-https ca-certificates && \
+        p7zip-full && \
     update-ca-certificates && \
     apt clean && \
     rm -rf /var/lib/apt/lists/* && \
@@ -72,7 +73,7 @@ RUN source ${MAIN_VENV}/bin/activate && \
 WORKDIR /workspace
 RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git && \
     cd /workspace/stable-diffusion-webui && \
-    git reset ${WEBUI_VERSION} --hard
+    #git reset ${WEBUI_VERSION} --hard
 
 # Complete Jupyter installation
 RUN source ${MAIN_VENV}/bin/activate && \
@@ -108,8 +109,8 @@ RUN source ${MAIN_VENV}/bin/activate && \
 
 # Set Dreambooth extension version
 WORKDIR /workspace/stable-diffusion-webui/extensions/sd_dreambooth_extension
-RUN git checkout main && \
-    git reset ${DREAMBOOTH_COMMIT} --hard
+#RUN git checkout main && \
+    #git reset ${DREAMBOOTH_COMMIT} --hard
 
 # Install the dependencies for the Dreambooth extension
 COPY requirements_dreambooth.txt ./requirements.txt
@@ -147,6 +148,7 @@ WORKDIR /workspace
 RUN mv /workspace/venv /venv
 RUN mv /workspace/kohya_ss /kohya_ss
 RUN mv /workspace/stable-diffusion-webui /stable-diffusion-webui
+RUN wget https://huggingface.co/MonsterMMORPG/SECourses/resolve/main/768x1024_2724_imgs.zip
 
 # Copy Stable Diffusion Web UI config files
 COPY webui-user.sh /stable-diffusion-webui/
